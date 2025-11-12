@@ -4,6 +4,7 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import GoogleButton from "react-google-button";
 import { useNavigate, Link } from "react-router-dom";
 import "./login.css";
+
 import { useUserAuth } from "../../context/UserAuthContext";
 const Login = () => {
   const [email, seteamil] = useState("");
@@ -59,6 +60,19 @@ const Login = () => {
                 <button type="submit" className="btn">
                   Log In
                 </button>
+<Link
+  to="/forgot-password"
+  style={{
+    textDecoration: "none",
+    color: "var(--twitter-color)",
+    fontWeight: "600",
+    marginTop: "10px",
+    display: "block",
+  }}
+>
+  Forgot password?
+</Link>
+
               </div>
             </form>
             <hr />

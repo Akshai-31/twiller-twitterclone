@@ -1,9 +1,6 @@
-import React, { useState } from "react";
-import { Box, Modal } from "@mui/material";
-import Button from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Modal, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton } from "@mui/material";
-import TextField from "@mui/material/TextField";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./Editprofile.css";
 
@@ -21,23 +18,18 @@ const style = {
 
 function Editchild({ dob, setdob }) {
   const [open, setopen] = useState(false);
-  const handleopen = () => {
-    setopen(true);
-  };
-  const handleclose = () => {
-    setopen(false);
-  };
+
   return (
-    <React.Fragment>
-      <div className="birthdate-section" onClick={handleopen}>
+    <>
+      <div className="birthdate-section" onClick={() => setopen(true)}>
         <text>Edit</text>
       </div>
       <Modal
         hideBackdrop
         open={open}
-        onClose={handleclose}
+        onClose={() => setopen(false)}
         aria-labelledby="child-modal-title"
-        aria-describedby="child-modal-descriptiom"
+        aria-describedby="child-modal-description"
       >
         <Box sx={{ ...style, width: 300, height: 300 }}>
           <div className="text">
@@ -46,65 +38,95 @@ function Editchild({ dob, setdob }) {
               This can only be changed a few times
               <br />
               Make sure you enter the age of the <br />
-              person using the account.{" "}
+              person using the account.
             </p>
-            <input type="date" onChange={(e) => setdob(e.target.value)} />
-            <button
-              className="e-button"
-              onClick={() => {
-                setopen(false);
-              }}
-            >
+            <input
+              type="date"
+              value={dob}
+              onChange={(e) => setdob(e.target.value)}
+            />
+            <button className="e-button" onClick={() => setopen(false)}>
               Cancel
             </button>
           </div>
         </Box>
       </Modal>
-    </React.Fragment>
+    </>
   );
 }
 
-const Editprofile = ({ user, loggedinuser }) => {
+const Editprofile = ({ user }) => {
   const [name, setname] = useState("");
   const [bio, setbio] = useState("");
   const [location, setlocation] = useState("");
   const [website, setwebsite] = useState("");
-  const [open, setopen] = useState(false);
   const [dob, setdob] = useState("");
+  const [open, setopen] = useState(false);
+  const [loggedinuser, setloggedinuser] = useState(null);
+
+  // ✅ Load from localStorage or fetch if missing
+  useEffect(() => {
+    const stored = localStorage.getItem("loggedinuser");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setloggedinuser(parsed);
+      setname(parsed.name || "");
+      setbio(parsed.bio || "");
+      setlocation(parsed.location || "");
+      setwebsite(parsed.website || "");
+      setdob(parsed.dob || "");
+    } else if (user?.email) {
+      fetch(`http://localhost:5000/loggedinuser?email=${user.email}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const userData = data[0] || {};
+          setloggedinuser(userData);
+          localStorage.setItem("loggedinuser", JSON.stringify(userData));
+          setname(userData.name || "");
+          setbio(userData.bio || "");
+          setlocation(userData.location || "");
+          setwebsite(userData.website || "");
+          setdob(userData.dob || "");
+        })
+        .catch((err) => console.error("Error fetching user:", err));
+    }
+  }, [user]);
+
+  // ✅ Handle save
   const handlesave = () => {
-    const editinfo = {
-      name,
-      bio,
-      location,
-      website,
-      dob,
-    };
-    fetch(`http://localhost:5000/userupdate/${user?.email}`, {
+    if (!user?.email) return alert("User not logged in!");
+
+    const editinfo = { name, bio, location, website, dob };
+
+    fetch(`http://localhost:5000/userupdate/${user.email}`, {
       method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(editinfo),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("done", data);
-      });
+        console.log("Profile updated:", data);
+        alert("Profile updated successfully!");
+        localStorage.setItem(
+          "loggedinuser",
+          JSON.stringify({ ...loggedinuser, ...editinfo })
+        );
+        setopen(false);
+      })
+      .catch((err) => console.error("Error updating profile:", err));
   };
+
   return (
     <div>
-      <button
-        onClick={() => {
-          setopen(true);
-        }}
-        className="Edit-profile-btn"
-      >
+      <button onClick={() => setopen(true)} className="Edit-profile-btn">
         Edit profile
       </button>
+
       <Modal
         open={open}
+        onClose={() => setopen(false)}
         aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-descriptiom"
+        aria-describedby="modal-modal-description"
       >
         <Box style={style} className="modal">
           <div className="header">
@@ -112,61 +134,54 @@ const Editprofile = ({ user, loggedinuser }) => {
               <CloseIcon />
             </IconButton>
             <h2 className="header-title">Edit Profile</h2>
-            <button className="save-btn" onClick={handlesave}>Save</button>
+            <button className="save-btn" onClick={handlesave}>
+              Save
+            </button>
           </div>
+
           <form className="fill-content">
             <TextField
               className="text-field"
               fullWidth
               label="Name"
-              id="fullWidth"
               variant="filled"
+              value={name}
               onChange={(e) => setname(e.target.value)}
-              deafultValue={loggedinuser[0]?.name ? loggedinuser[0].name : ""}
             />
             <TextField
               className="text-field"
               fullWidth
               label="Bio"
-              id="fullWidth"
               variant="filled"
+              value={bio}
               onChange={(e) => setbio(e.target.value)}
-              deafultValue={loggedinuser[0]?.bio ? loggedinuser[0].bio : ""}
             />
             <TextField
               className="text-field"
               fullWidth
               label="Location"
-              id="fullWidth"
               variant="filled"
+              value={location}
               onChange={(e) => setlocation(e.target.value)}
-              deafultValue={
-                loggedinuser[0]?.location ? loggedinuser[0].location : ""
-              }
             />
             <TextField
               className="text-field"
               fullWidth
               label="Website"
-              id="fullWidth"
               variant="filled"
+              value={website}
               onChange={(e) => setwebsite(e.target.value)}
-              deafultValue={
-                loggedinuser[0]?.website ? loggedinuser[0].website : ""
-              }
             />
           </form>
+
           <div className="birthdate-section">
             <p>Birth Date</p>
             <p>.</p>
             <Editchild dob={dob} setdob={setdob} />
           </div>
+
           <div className="last-section">
-            {loggedinuser[0]?.dob ? (
-              <h2>{loggedinuser[0]?.dob}</h2>
-            ) : (
-              <h2>{dob ? dob : "Add your date of birth"}</h2>
-            )}
+            <h2>{dob ? dob : "Add your date of birth"}</h2>
             <div className="last-btn">
               <h2>Switch to Professional</h2>
               <ChevronRightIcon />
