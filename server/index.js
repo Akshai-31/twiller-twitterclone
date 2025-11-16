@@ -1,14 +1,19 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
-
-const uri = "mongodb+srv://akshaiv:vijayrr2205@twitter-db.hsoj1ah.mongodb.net/";
-const port = 5000;
+const { MongoClient, ServerApiVersion } = require("mongodb");
+require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+const userRoutes = require("./routes/userRoutes");
+// Use Routes
+app.use("/api/user", userRoutes);
 
+const uri = "mongodb+srv://akshaiv:vijayrr2205@twitter-db.hsoj1ah.mongodb.net/";
+const port = 5000;
+
+// MongoDB setup
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -25,156 +30,134 @@ async function run() {
     const postcollection = db.collection("posts");
     const usercollection = db.collection("users");
 
-    // ✅ Register new user
+    // ✅ Root
+    app.get("/", (req, res) => res.send("🚀 Twiller Backend Running!"));
+
+    // ✅ Register User
     app.post("/register", async (req, res) => {
       try {
         const user = req.body;
         const result = await usercollection.insertOne(user);
         res.status(201).send(result);
-      } catch (error) {
-        console.error("Error in /register:", error);
+      } catch (err) {
+        console.error(err);
         res.status(500).send({ error: "Registration failed" });
       }
     });
 
-    // ✅ Get logged-in user by email
+    // ✅ Get User by Email
     app.get("/loggedinuser", async (req, res) => {
-      try {
-        const email = req.query.email;
-        const user = await usercollection.findOne({ email });
-        res.send(user);
-      } catch (error) {
-        console.error("Error in /loggedinuser:", error);
-        res.status(500).send({ error: "Failed to fetch user" });
-      }
+      const email = req.query.email;
+      const user = await usercollection.findOne({ email });
+      console.log("Fetched user:", user);
+      res.send(user);
     });
 
-    // ✅ Create a new post
+    // ✅ Create Post
     app.post("/post", async (req, res) => {
       try {
         const post = req.body;
         const result = await postcollection.insertOne(post);
         res.status(201).send(result);
-      } catch (error) {
-        console.error("Error in /post:", error);
-        res.status(500).send({ error: "Failed to create post" });
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: "Post failed" });
       }
     });
 
-    // ✅ Get all posts (reversed)
+    // ✅ Get All Posts
     app.get("/post", async (req, res) => {
-      try {
-        const post = (await postcollection.find().toArray()).reverse();
-        res.send(post);
-      } catch (error) {
-        console.error("Error in /post:", error);
-        res.status(500).send({ error: "Failed to fetch posts" });
-      }
+      const post = (await postcollection.find().toArray()).reverse();
+      res.send(post);
     });
 
-    // ✅ Get posts by user email
+    // ✅ Get User Posts
     app.get("/userpost", async (req, res) => {
-      try {
-        const email = req.query.email;
-        const post = (
-          await postcollection.find({ email }).toArray()
-        ).reverse();
-        res.send(post);
-      } catch (error) {
-        console.error("Error in /userpost:", error);
-        res.status(500).send({ error: "Failed to fetch user posts" });
-      }
+      const email = req.query.email;
+      const post = (await postcollection.find({ email }).toArray()).reverse();
+      res.send(post);
     });
 
-    // ✅ Get all users
+    // ✅ Get All Users
     app.get("/user", async (req, res) => {
-      try {
-        const users = await usercollection.find().toArray();
-        res.send(users);
-      } catch (error) {
-        console.error("Error in /user:", error);
-        res.status(500).send({ error: "Failed to fetch users" });
-      }
+      const users = await usercollection.find().toArray();
+      res.send(users);
     });
 
-   app.patch("/userupdate/:email", async (req, res) => {
+    // ✅ Update User Profile
+    // app.patch("/userupdate/:email", async (req, res) => {
+    //   try {
+    //     const email = req.params.email;
+    //     const profile = req.body;
+
+    //     const updateFields = {};
+    //     if (profile.name) updateFields.name = profile.name;
+    //     if (profile.bio) updateFields.bio = profile.bio;
+    //     if (profile.location) updateFields.location = profile.location;
+    //     if (profile.website) updateFields.website = profile.website;
+    //     if (profile.dob) updateFields.dob = profile.dob;
+
+    //     const filter = { email };
+    //     const updateDoc = { $set: updateFields };
+
+    //     const result = await usercollection.updateOne(filter, updateDoc);
+    //     res.json({ success: true, message: "Profile updated successfully", result });
+    //   } catch (error) {
+    //     res.status(500).json({ success: false, message: "Internal server error" });
+    //   }
+    // });
+
+
+
+// ✅ Update User Profile (with profileImage + coverImage)
+app.patch("/userupdate/:email", async (req, res) => {
   try {
-    const email = req.params.email; // ✅ Correctly extract email from params
+    const email = req.params.email;
     const profile = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
-
-    // ✅ Build update object dynamically (only fields that exist)
     const updateFields = {};
+
+    // Basic details
     if (profile.name) updateFields.name = profile.name;
     if (profile.bio) updateFields.bio = profile.bio;
     if (profile.location) updateFields.location = profile.location;
     if (profile.website) updateFields.website = profile.website;
     if (profile.dob) updateFields.dob = profile.dob;
 
-    const filter = { email: email };
-    const options = { upsert: true };
+    // Images (Cloudinary URLs)
+    if (profile.profileImage) updateFields.profileImage = profile.profileImage;
+    if (profile.coverImage) updateFields.coverImage = profile.coverImage;
+
+    const filter = { email };
     const updateDoc = { $set: updateFields };
 
-    const result = await usercollection.updateOne(filter, updateDoc, options);
+    const result = await usercollection.updateOne(filter, updateDoc);
 
-    if (result.modifiedCount > 0 || result.upsertedCount > 0) {
-      res.json({ success: true, message: "Profile updated successfully" });
-    } else {
-      res.json({ success: false, message: "No changes made" });
-    }
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-
-    // ✅ Root route
-    app.get("/", (req, res) => {
-      res.send("Twiller is working 🚀");
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      updateFields,
+      result,
     });
-
-    console.log("✅ Connected to MongoDB and server endpoints are ready!");
   } catch (error) {
-    console.error("❌ Connection Error:", error);
-  }
-  // ✅ GET User Profile (View)
-app.get("/api/profile/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching profile", error: err.message });
-  }
-});
-
-// ✅ PUT User Profile (Update)
-app.put("/api/profile/:id", async (req, res) => {
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedUser) return res.status(404).json({ message: "User not found" });
-    res.json(updatedUser);
-  } catch (err) {
-    res.status(500).json({ message: "Error updating profile", error: err.message });
+    console.error("Profile update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 });
 
 
+
+
+
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    console.error("❌ Error connecting MongoDB:", error);
+  }
 }
 
 run().catch(console.dir);
 
-
-
-
-app.listen(port, () => {
-  console.log(`🚀 Twiller clone running on port ${port}`);
-});
+app.listen(port, () => console.log(`🚀 Twiller backend running on port ${port}`));

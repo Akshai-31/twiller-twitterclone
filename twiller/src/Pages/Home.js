@@ -22,7 +22,9 @@ const Home = () => {
   return (
     <div className="app">
       <Sidebar handlelogout={handlelogout} user={user} />
+     <div className="center-block">
       <Outlet />
+      </div>
       <Widgets />
     </div>
   );

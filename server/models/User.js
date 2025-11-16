@@ -32,17 +32,17 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     dob: {
-      type: String, // stored as "YYYY-MM-DD" from input type="date"
+      type: String, // stored as "YYYY-MM-DD"
       default: "",
     },
 
     // Images
     profileImage: {
-      type: String, // profile picture URL
+      type: String, // Profile picture URL
       default: "",
     },
-    coverimage: {
-      type: String, // cover photo URL
+    coverImage: {
+      type: String, // Cover photo URL
       default: "",
     },
 

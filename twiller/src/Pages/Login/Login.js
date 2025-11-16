@@ -24,14 +24,38 @@ const Login = () => {
     }
   };
   const hanglegooglesignin = async (e) => {
-    e.preventDefault();
-    try {
-      await googleSignIn();
-      navigate("/");
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+  console.log("Google Sign-in initiated");
+  e.preventDefault();
+  try {
+    const result = await googleSignIn();
+    const user = result.user;
+console.log(user);
+    // Google user details
+    const newUser = {
+      username: user.email.split("@")[0],
+      name: user.displayName,
+      email: user.email,
+      profileImage: user.photoURL,
+      coverImage: "",  // initially empty
+    };
+
+    // Check or insert user in MongoDB
+    const res = await fetch("http://localhost:5000/register", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(newUser),
+    });
+
+    const data = await res.json();
+
+    navigate("/");
+  } catch (error) {
+    console.log(error.message);
+    alert("Google Sign-in Failed");
+  }
+};
   return (
     <>
       <div className="login-container">

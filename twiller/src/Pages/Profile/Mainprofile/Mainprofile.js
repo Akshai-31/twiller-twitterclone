@@ -25,59 +25,92 @@ const Mainprofile = ({ user }) => {
       .then((data) => setpost(data));
   }, [user.email]);
 
-  // Upload Cover Image to Cloudinary via backend
-  const handleuploadcoverimage = async (e) => {
-    try {
-      setisloading(true);
-      const image = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("email", user?.email);
+ 
 
-      const res = await axios.post(
-        "http://localhost:5000/api/user/upload/cover",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
 
-      console.log("Cover image updated:", res.data);
-      setisloading(false);
-      window.location.reload(); // reload to reflect change
-    } catch (error) {
-      console.error(error);
-      setisloading(false);
-      alert("Failed to upload cover image");
+
+// CLOUDINARY CONFIG
+const CLOUDINARY_UPLOAD_PRESET = "twitter-mern"; // your preset name
+const CLOUDINARY_CLOUD_NAME = "devksymwg"; // your cloud name
+
+// Upload to Cloudinary
+const uploadToCloudinary = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
     }
-  };
+  );
 
-  // Upload Profile Image to Cloudinary via backend
-  const handleuploadprofileimage = async (e) => {
-    try {
-      setisloading(true);
-      const image = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("email", user?.email);
+  const data = await res.json();
+  return data.secure_url; // returns the URL of uploaded image
+};
 
-      const res = await axios.post(
-        "http://localhost:5000/api/user/upload/profile",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
 
-      console.log("Profile image updated:", res.data);
-      setisloading(false);
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
-      setisloading(false);
-      alert("Failed to upload profile image");
-    }
-  };
+
+
+
+
+
+
+    
+
+const handleuploadcoverimage = async (e) => {
+  try {
+    setisloading(true);
+    const image = e.target.files[0];
+
+    // 1️⃣ Upload to Cloudinary from frontend
+    const imageUrl = await uploadToCloudinary(image);
+
+    // 2️⃣ Send URL to backend to update user
+    await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
+      coverImage: imageUrl,
+    });
+
+    setisloading(false);
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    setisloading(false);
+    alert("Failed to upload cover image");
+  }
+};
+
+
+
+
+
+const handleuploadprofileimage = async (e) => {
+  try {
+    setisloading(true);
+    const image = e.target.files[0];
+
+    // 1️⃣ Upload to Cloudinary from frontend
+    const imageUrl = await uploadToCloudinary(image);
+    console.log("Uploaded to Cloudinary:", imageUrl);
+    // 2️⃣ Send URL to backend to update user
+    await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
+      profileImage: imageUrl,
+    });
+
+    setisloading(false);
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    setisloading(false);
+    alert("Failed to upload profile image");
+  }
+};
+
+
+
+
 
   return (
     <div>
@@ -91,8 +124,8 @@ const Mainprofile = ({ user }) => {
             <div className="coverImageContainer">
               <img
                 src={
-                  loggedinuser[0]?.coverImage
-                    ? loggedinuser[0].coverImage
+                  loggedinuser?.coverImage
+                    ? loggedinuser.coverImage
                     : user?.photoURL
                 }
                 alt="cover"
@@ -122,8 +155,8 @@ const Mainprofile = ({ user }) => {
               <div className="avatarContainer">
                 <img
                   src={
-                    loggedinuser[0]?.profileImage
-                      ? loggedinuser[0].profileImage
+                    loggedinuser?.profileImage
+                      ? loggedinuser.profileImage
                       : user?.photoURL
                   }
                   alt="avatar"
@@ -152,7 +185,7 @@ const Mainprofile = ({ user }) => {
               <div className="userInfo">
                 <div>
                   <h3 className="heading-3">
-                    {loggedinuser[0]?.name || user?.displayName}
+                    {loggedinuser?.name || user?.displayName}
                   </h3>
                   <p className="usernameSection">@{username}</p>
                 </div>
@@ -161,16 +194,16 @@ const Mainprofile = ({ user }) => {
 
               {/* BIO + LOCATION + LINK */}
               <div className="infoContainer">
-                {loggedinuser[0]?.bio && <p>{loggedinuser[0].bio}</p>}
+                {loggedinuser?.bio && <p>{loggedinuser.bio}</p>}
                 <div className="locationAndLink">
-                  {loggedinuser[0]?.location && (
+                  {loggedinuser?.location && (
                     <p className="subInfo">
-                      <MyLocationIcon /> {loggedinuser[0].location}
+                      <MyLocationIcon /> {loggedinuser.location}
                     </p>
                   )}
-                  {loggedinuser[0]?.website && (
+                  {loggedinuser?.website && (
                     <p className="subInfo link">
-                      <AddLinkIcon /> {loggedinuser[0].website}
+                      <AddLinkIcon /> {loggedinuser.website}
                     </p>
                   )}
                 </div>
