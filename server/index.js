@@ -6,10 +6,6 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-const userRoutes = require("./routes/userRoutes");
-// Use Routes
-app.use("/api/user", userRoutes);
-
 const uri = "mongodb+srv://akshaiv:vijayrr2205@twitter-db.hsoj1ah.mongodb.net/";
 const port = 5000;
 
@@ -65,18 +61,69 @@ async function run() {
       }
     });
 
-    // ✅ Get All Posts
-    app.get("/post", async (req, res) => {
-      const post = (await postcollection.find().toArray()).reverse();
-      res.send(post);
-    });
+    // ✅ Get ALL Posts with user profile images
+app.get("/post", async (req, res) => {
+  try {
+    const posts = await postcollection.find().toArray();
 
-    // ✅ Get User Posts
-    app.get("/userpost", async (req, res) => {
-      const email = req.query.email;
-      const post = (await postcollection.find({ email }).toArray()).reverse();
-      res.send(post);
-    });
+    // Reverse for latest first
+    const reversed = posts.reverse();
+
+    // Attach profile image for each post
+    const finalPosts = await Promise.all(
+      reversed.map(async (p) => {
+        const user = await usercollection.findOne({ email: p.email });
+
+        return {
+          ...p,
+          profileImage : user?.profileImage || null,
+          username: user?.username || "",
+          name: user?.name || "",
+        };
+      })
+    );
+
+    res.send(finalPosts);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ error: "Server error" });
+  }
+});
+
+    // ✅ Get User Posts + Append User Info
+app.get("/userpost", async (req, res) => {
+  try {
+    const email = req.query.email;
+
+    // 🔹 1. Get user details from users collection
+    const user = await usercollection.findOne(
+      { email: email },
+      { projection: { profileImage: 1, name: 1, username: 1, email: 1 } }
+    );
+
+    // 🔹 2. Get posts from posts collection
+    let posts = await postcollection.find({ email: email }).toArray();
+
+    // reverse (same as your current logic)
+    posts = posts.reverse();
+
+    // 🔹 3. Append user info to every post
+    const finalPosts = posts.map((p) => ({
+      ...p,
+      profileImage: user?.profileImage ?? null,
+      username: user?.username ?? email.split("@")[0],
+      name: user?.name ?? "",
+    }));
+
+    // 🔹 4. Send to frontend
+    res.send(finalPosts);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Server error" });
+  }
+});
+
 
     // ✅ Get All Users
     app.get("/user", async (req, res) => {

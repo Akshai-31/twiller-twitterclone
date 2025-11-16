@@ -14,8 +14,8 @@ const Tweetbox = () => {
   const { user } = useUserAuth();
   const [loggedinsuer] = useLoggedinuser();
   const email = user?.email;
-  const userprofilepic = loggedinsuer[0]?.profileImage
-    ? loggedinsuer[0].profileImage
+  const userprofilepic = loggedinsuer?.profileImage
+    ? loggedinsuer.profileImage
     : user && user.photoURL;
 
   const handleuploadimage = (e) => {
@@ -84,8 +84,8 @@ const Tweetbox = () => {
         <div className="tweetBox__input">
           <Avatar
             src={
-              loggedinsuer[0]?.profileImage
-                ? loggedinsuer[0].profileImage
+              loggedinsuer?.profileImage
+                ? loggedinsuer.profileImage
                 : user && user.photoURL
             }
           />

@@ -69,16 +69,16 @@ const Sidebar = ({ handlelogout, user }) => {
       <div className="Profile__info">
         <Avatar
           src={
-            loggedinuser[0]?.profileImage
-              ? loggedinuser[0].profileImage
+            loggedinuser?.profileImage
+              ? loggedinuser.profileImage
               : user && user.photoURL
             // : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
           }
         />
         <div className="user__info">
           <h4>
-            {loggedinuser[0]?.name
-              ? loggedinuser[0].name
+            {loggedinuser?.name
+              ? loggedinuser.name
               : user && user.displayName}
           </h4>
           <h5>@{result}</h5>
@@ -106,8 +106,8 @@ const Sidebar = ({ handlelogout, user }) => {
           >
             <Avatar
               src={
-                loggedinuser[0]?.profileImage
-                  ? loggedinuser[0]?.profileImage
+                loggedinuser?.profileImage
+                  ? loggedinuser?.profileImage
                   : user && user.photoURL
                   // : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
               }
@@ -115,8 +115,8 @@ const Sidebar = ({ handlelogout, user }) => {
             <div className="user__info subUser__info">
               <div>
                 <h4>
-                  {loggedinuser[0]?.name
-                    ? loggedinuser[0].name
+                  {loggedinuser?.name
+                    ? loggedinuser.name
                     : user && user.displayName}
                 </h4>
                 <h5>@{result}</h5>

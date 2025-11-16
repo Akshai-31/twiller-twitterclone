@@ -14,9 +14,17 @@ import useLoggedinuser from "../../../hooks/useLoggedinuser";
 const Mainprofile = ({ user }) => {
   const navigate = useNavigate();
   const [isloading, setisloading] = useState(false);
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false);
   const [loggedinuser] = useLoggedinuser();
   const username = user?.email?.split("@")[0];
   const [post, setpost] = useState([]);
+
+  // Avatar choices
+  const avatarList = [
+    "/avatar/a1.jpg",
+    "/avatar/a2.jpg",
+    "/avatar/a3.jpg"
+  ];
 
   // Fetch user posts
   useEffect(() => {
@@ -25,91 +33,61 @@ const Mainprofile = ({ user }) => {
       .then((data) => setpost(data));
   }, [user.email]);
 
- 
+
+  // CLOUDINARY CONFIG
+  const CLOUDINARY_UPLOAD_PRESET = "twitter-mern";
+  const CLOUDINARY_CLOUD_NAME = "devksymwg";
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    return data.secure_url;
+  };
 
 
-
-// CLOUDINARY CONFIG
-const CLOUDINARY_UPLOAD_PRESET = "twitter-mern"; // your preset name
-const CLOUDINARY_CLOUD_NAME = "devksymwg"; // your cloud name
-
-// Upload to Cloudinary
-const uploadToCloudinary = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
+  // Choose predefined avatar
+  const chooseAvatar = async (url) => {
+    try {
+      await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
+        profileImage: url,
+      });
+      setShowAvatarPopup(false);
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
     }
-  );
+  };
 
-  const data = await res.json();
-  return data.secure_url; // returns the URL of uploaded image
-};
+  // Upload new Avatar
+  const handleuploadprofileimage = async (e) => {
+    try {
+      setisloading(true);
+      const file = e.target.files[0];
 
+      const imageUrl = await uploadToCloudinary(file);
 
+      await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
+        profileImage: imageUrl,
+      });
 
-
-
-
-
-
-    
-
-const handleuploadcoverimage = async (e) => {
-  try {
-    setisloading(true);
-    const image = e.target.files[0];
-
-    // 1️⃣ Upload to Cloudinary from frontend
-    const imageUrl = await uploadToCloudinary(image);
-
-    // 2️⃣ Send URL to backend to update user
-    await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
-      coverImage: imageUrl,
-    });
-
-    setisloading(false);
-    window.location.reload();
-  } catch (error) {
-    console.error(error);
-    setisloading(false);
-    alert("Failed to upload cover image");
-  }
-};
-
-
-
-
-
-const handleuploadprofileimage = async (e) => {
-  try {
-    setisloading(true);
-    const image = e.target.files[0];
-
-    // 1️⃣ Upload to Cloudinary from frontend
-    const imageUrl = await uploadToCloudinary(image);
-    console.log("Uploaded to Cloudinary:", imageUrl);
-    // 2️⃣ Send URL to backend to update user
-    await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
-      profileImage: imageUrl,
-    });
-
-    setisloading(false);
-    window.location.reload();
-  } catch (error) {
-    console.error(error);
-    setisloading(false);
-    alert("Failed to upload profile image");
-  }
-};
-
-
-
+      setisloading(false);
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      setisloading(false);
+    }
+  };
 
 
   return (
@@ -123,30 +101,28 @@ const handleuploadprofileimage = async (e) => {
             {/* COVER IMAGE */}
             <div className="coverImageContainer">
               <img
-                src={
-                  loggedinuser?.coverImage
-                    ? loggedinuser.coverImage
-                    : user?.photoURL
-                }
+                src={loggedinuser?.coverImage || user?.photoURL}
                 alt="cover"
                 className="coverImage"
               />
+
               <div className="hoverCoverImage">
-                <div className="imageIcon_tweetButton">
-                  <label htmlFor="coverUpload" className="imageIcon">
-                    {isloading ? (
-                      <LockResetIcon className="photoIcon photoIconDisabled" />
-                    ) : (
-                      <CenterFocusWeakIcon className="photoIcon" />
-                    )}
-                  </label>
-                  <input
-                    type="file"
-                    id="coverUpload"
-                    className="imageInput"
-                    onChange={handleuploadcoverimage}
-                  />
-                </div>
+                <label htmlFor="coverUpload" className="imageIcon">
+                  <CenterFocusWeakIcon className="photoIcon" />
+                </label>
+                <input
+                  type="file"
+                  id="coverUpload"
+                  className="imageInput"
+                  onChange={async (e) => {
+                    const img = await uploadToCloudinary(e.target.files[0]);
+                    await axios.patch(
+                      `http://localhost:5000/userupdate/${user.email}`,
+                      { coverImage: img }
+                    );
+                    window.location.reload();
+                  }}
+                />
               </div>
             </div>
 
@@ -154,63 +130,61 @@ const handleuploadprofileimage = async (e) => {
             <div className="avatar-img">
               <div className="avatarContainer">
                 <img
-                  src={
-                    loggedinuser?.profileImage
-                      ? loggedinuser.profileImage
-                      : user?.photoURL
-                  }
+                  src={loggedinuser?.profileImage || user?.photoURL}
                   alt="avatar"
                   className="avatar"
+                  onClick={() => setShowAvatarPopup(true)} // SHOW POPUP
                 />
-                <div className="hoverAvatarImage">
-                  <div className="imageIcon_tweetButton">
-                    <label htmlFor="profileUpload" className="imageIcon">
-                      {isloading ? (
-                        <LockResetIcon className="photoIcon photoIconDisabled" />
-                      ) : (
-                        <CenterFocusWeakIcon className="photoIcon" />
-                      )}
+              </div>
+
+              {/* POPUP WINDOW */}
+              {showAvatarPopup && (
+                <div className="avatarPopup">
+                  <div className="avatarPopupContent">
+                    <h3>Choose Avatar</h3>
+
+                    <div className="avatarOptions">
+                      {avatarList.map((src, i) => (
+                        <img
+                          key={i}
+                          src={src}
+                          alt="avatar"
+                          className="avatarChoice"
+                          onClick={() => chooseAvatar(src)}
+                        />
+                      ))}
+                    </div>
+
+                    <label className="uploadBtn">
+                      Upload New
+                      <input
+                        type="file"
+                        id="profileUpload"
+                        className="avatarUploadInput"
+                        onChange={handleuploadprofileimage}
+                      />
                     </label>
-                    <input
-                      type="file"
-                      id="profileUpload"
-                      className="imageInput"
-                      onChange={handleuploadprofileimage}
-                    />
+
+                    <button
+                      className="closeAvatarPopup"
+                      onClick={() => setShowAvatarPopup(false)}
+                    >
+                      Close
+                    </button>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* USER INFO */}
               <div className="userInfo">
-                <div>
-                  <h3 className="heading-3">
-                    {loggedinuser?.name || user?.displayName}
-                  </h3>
-                  <p className="usernameSection">@{username}</p>
-                </div>
+                <h3 className="heading-3">
+                  {loggedinuser?.name || user?.displayName}
+                </h3>
+                <p className="usernameSection">@{username}</p>
                 <Editprofile user={user} loggedinuser={loggedinuser} />
               </div>
 
-              {/* BIO + LOCATION + LINK */}
-              <div className="infoContainer">
-                {loggedinuser?.bio && <p>{loggedinuser.bio}</p>}
-                <div className="locationAndLink">
-                  {loggedinuser?.location && (
-                    <p className="subInfo">
-                      <MyLocationIcon /> {loggedinuser.location}
-                    </p>
-                  )}
-                  {loggedinuser?.website && (
-                    <p className="subInfo link">
-                      <AddLinkIcon /> {loggedinuser.website}
-                    </p>
-                  )}
-                </div>
-              </div>
-
               <h4 className="tweetsText">Tweets</h4>
-              <hr />
             </div>
 
             {/* POSTS */}
