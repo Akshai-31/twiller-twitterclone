@@ -1,92 +1,87 @@
-import React, { useState, useEffect } from "react";
-import Post from "../Posts/posts";
-import { useNavigate } from "react-router-dom";
-import "./Mainprofile.css";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CenterFocusWeakIcon from "@mui/icons-material/CenterFocusWeak";
-import Editprofile from "../Editprofile/Editprofile";
-import axios from "axios";
-import useLoggedinuser from "../../../hooks/useLoggedinuser";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-
-
-
+import React, { useState, useEffect } from 'react'
+import Post from '../Posts/posts'
+import { useNavigate } from 'react-router-dom'
+import './Mainprofile.css'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
+import Editprofile from '../Editprofile/Editprofile'
+import axios from 'axios'
+import useLoggedinuser from '../../../hooks/useLoggedinuser'
 
 const Mainprofile = ({ user, location, handleGetLocation }) => {
-  const navigate = useNavigate();
-  const [isloading, setisloading] = useState(false);
-  const [showAvatarPopup, setShowAvatarPopup] = useState(false);
-  const [loggedinuser] = useLoggedinuser();
-  const username = user?.email?.split("@")[0];
-  const [post, setpost] = useState([]);
+  const navigate = useNavigate()
+  const [isloading, setisloading] = useState(false)
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false)
+  const [loggedinuser] = useLoggedinuser()
+  const username = user?.email?.split('@')[0]
+  const [post, setpost] = useState([])
 
-  const avatarList = ["/avatar/a1.jpg", "/avatar/a2.jpg", "/avatar/a3.jpg"];
+  const avatarList = ['/avatar/a1.jpg', '/avatar/a2.jpg', '/avatar/a3.jpg']
 
   // Fetch User Posts
   useEffect(() => {
     fetch(`http://localhost:5000/userpost?email=${user?.email}`)
       .then((res) => res.json())
-      .then((data) => setpost(data));
-  }, [user.email]);
+      .then((data) => setpost(data))
+  }, [user.email])
 
   // CLOUDINARY
-  const CLOUDINARY_UPLOAD_PRESET = "twitter-mern";
-  const CLOUDINARY_CLOUD_NAME = "devksymwg";
+  const CLOUDINARY_UPLOAD_PRESET = 'twitter-mern'
+  const CLOUDINARY_CLOUD_NAME = 'devksymwg'
 
   const uploadToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
 
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
       {
-        method: "POST",
+        method: 'POST',
         body: formData,
       }
-    );
+    )
 
-    const data = await res.json();
-    return data.secure_url;
-  };
+    const data = await res.json()
+    return data.secure_url
+  }
 
   // Choose Avatar
   const chooseAvatar = async (url) => {
     try {
       await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
         profileImage: url,
-      });
-      setShowAvatarPopup(false);
-      window.location.reload();
+      })
+      setShowAvatarPopup(false)
+      window.location.reload()
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
 
   // Upload Avatar
   const handleuploadprofileimage = async (e) => {
     try {
-      setisloading(true);
-      const file = e.target.files[0];
+      setisloading(true)
+      const file = e.target.files[0]
 
-      const imageUrl = await uploadToCloudinary(file);
+      const imageUrl = await uploadToCloudinary(file)
 
       await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
         profileImage: imageUrl,
-      });
+      })
 
-      setisloading(false);
-      window.location.reload();
+      setisloading(false)
+      window.location.reload()
     } catch (error) {
-      console.error(error);
-      setisloading(false);
+      console.error(error)
+      setisloading(false)
     }
-  };
+  }
 
   return (
     <div>
-      <ArrowBackIcon className="arrow-icon" onClick={() => navigate("/")} />
+      <ArrowBackIcon className="arrow-icon" onClick={() => navigate('/')} />
       <h4 className="heading-4">{username}</h4>
 
       <div className="mainprofile">
@@ -109,12 +104,12 @@ const Mainprofile = ({ user, location, handleGetLocation }) => {
                   id="coverUpload"
                   className="imageInput"
                   onChange={async (e) => {
-                    const img = await uploadToCloudinary(e.target.files[0]);
+                    const img = await uploadToCloudinary(e.target.files[0])
                     await axios.patch(
                       `http://localhost:5000/userupdate/${user.email}`,
                       { coverImage: img }
-                    );
-                    window.location.reload();
+                    )
+                    window.location.reload()
                   }}
                 />
               </div>
@@ -183,7 +178,7 @@ const Mainprofile = ({ user, location, handleGetLocation }) => {
 
                 <div className="locationAndLink">
                   <span className="subInfo">
-                    📍 {location ? location : "Location not set"}
+                    📍 {location ? location : 'Location not set'}
                   </span>
                 </div>
 
@@ -204,7 +199,7 @@ const Mainprofile = ({ user, location, handleGetLocation }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Mainprofile;
+export default Mainprofile
