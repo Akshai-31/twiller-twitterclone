@@ -1,0 +1,93 @@
+/* Similar to login.css for consistent style */
+.otp-container {
+    display: flex;
+    flex: 1;
+    width: 100vw;
+}
+
+.form-container {
+    flex: 1;
+    padding: 50px;
+    margin: 10px;
+}
+
+.form-box {
+    justify-content: left;
+    align-items: inherit;
+    grid-row: auto;
+}
+
+.image-container {
+    flex: 2;
+    margin-left: -100px;
+}
+
+.image {
+    max-width: 100%;
+    height: 100%;
+}
+
+input {
+    display: grid;
+    margin-bottom: 1px;
+    padding: 5px;
+    background-color: white;
+    margin-top: 20px;
+}
+
+.otp-input {
+    background-color: #E8F0FE;
+    width: 80%;
+    border-radius: 8px;
+    padding: 14px;
+    border: none;
+    outline: none;
+}
+
+.btn-login {
+    padding: 7px;
+}
+
+.btn {
+    background-color: rgb(92, 199, 241);
+    width: 48%;
+    margin-right: 20px;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 17px;
+    border: none;
+    outline: none;
+    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+.errorMessage {
+    color: red;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+@media screen and (max-width:688px) {
+    .otp-container {
+        display: flex;
+        flex-direction: column;
+        font-size: 20px;
+    }
+
+    .form-container {
+        padding: 10px;
+    }
+
+    .image-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column-reverse;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .image {
+        width: 100%;
+        height: 100%;
+    }
+}
