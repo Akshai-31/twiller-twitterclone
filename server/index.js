@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 require("dotenv").config();
+const axios = require("axios");
+
 
 const app = express();
 app.use(cors());
@@ -153,6 +155,85 @@ app.get("/userpost", async (req, res) => {
     //     res.status(500).json({ success: false, message: "Internal server error" });
     //   }
     // });
+
+
+
+
+
+
+app.post("/save-location", async (req, res) => {
+  try {
+    const { email, latitude, longitude } = req.body;
+
+    if (!email || !latitude || !longitude) {
+      return res.status(400).json({ error: "Missing data" });
+    }
+
+    console.log("Received:", email, latitude, longitude);
+
+    // 🔹 Reverse Geocoding with OpenStreetMap Nominatim
+    const nominatimURL = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+
+    const geoRes = await axios.get(nominatimURL, {
+      headers: {
+        "User-Agent": "TwillerApp/1.0 (your-email@example.com)" // required by Nominatim
+      }
+    });
+
+    const address = geoRes.data.address;
+    const city = address.city || address.town || address.village || "";
+    const state = address.state || "";
+    const country = address.country || "";
+
+    console.log("Reverse geocode result:", city, state, country);
+
+    // 🔹 Optional: Weather API (OpenWeatherMap) — keep your API key
+    const weatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.WEATHER_API_KEY}&units=metric`;
+    const weatherRes = await axios.get(weatherURL);
+    const weather = {
+      temperature: weatherRes.data.main.temp,
+      humidity: weatherRes.data.main.humidity,
+      condition: weatherRes.data.weather[0].description
+    };
+
+    // 🔹 Save to MongoDB
+    await usercollection.updateOne(
+      { email },
+      { $set: { location: { latitude, longitude, city, state, country, weather } } }
+    );
+
+    res.json({ success: true, location: { city, state, country, weather } });
+  } catch (err) {
+    console.error("Save-location error:", err.message);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+
+// =========================
+//   GET USER LOCATION
+// =========================
+app.get("/get-location", async (req, res) => {
+  try {
+    const email = req.query.email;
+    const user = await usercollection.findOne({ email });
+
+    res.json(user?.location || {});
+  } catch (err) {
+    res.json({ error: "Error fetching location" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 

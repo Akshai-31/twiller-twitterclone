@@ -4,14 +4,16 @@ import { useNavigate } from "react-router-dom";
 import "./Mainprofile.css";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CenterFocusWeakIcon from "@mui/icons-material/CenterFocusWeak";
-import LockResetIcon from "@mui/icons-material/LockReset";
-import MyLocationIcon from "@mui/icons-material/MyLocation";
-import AddLinkIcon from "@mui/icons-material/AddLink";
 import Editprofile from "../Editprofile/Editprofile";
 import axios from "axios";
 import useLoggedinuser from "../../../hooks/useLoggedinuser";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const Mainprofile = ({ user }) => {
+
+
+
+const Mainprofile = ({ user, location, handleGetLocation }) => {
   const navigate = useNavigate();
   const [isloading, setisloading] = useState(false);
   const [showAvatarPopup, setShowAvatarPopup] = useState(false);
@@ -19,22 +21,16 @@ const Mainprofile = ({ user }) => {
   const username = user?.email?.split("@")[0];
   const [post, setpost] = useState([]);
 
-  // Avatar choices
-  const avatarList = [
-    "/avatar/a1.jpg",
-    "/avatar/a2.jpg",
-    "/avatar/a3.jpg"
-  ];
+  const avatarList = ["/avatar/a1.jpg", "/avatar/a2.jpg", "/avatar/a3.jpg"];
 
-  // Fetch user posts
+  // Fetch User Posts
   useEffect(() => {
     fetch(`http://localhost:5000/userpost?email=${user?.email}`)
       .then((res) => res.json())
       .then((data) => setpost(data));
   }, [user.email]);
 
-
-  // CLOUDINARY CONFIG
+  // CLOUDINARY
   const CLOUDINARY_UPLOAD_PRESET = "twitter-mern";
   const CLOUDINARY_CLOUD_NAME = "devksymwg";
 
@@ -55,8 +51,7 @@ const Mainprofile = ({ user }) => {
     return data.secure_url;
   };
 
-
-  // Choose predefined avatar
+  // Choose Avatar
   const chooseAvatar = async (url) => {
     try {
       await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
@@ -69,7 +64,7 @@ const Mainprofile = ({ user }) => {
     }
   };
 
-  // Upload new Avatar
+  // Upload Avatar
   const handleuploadprofileimage = async (e) => {
     try {
       setisloading(true);
@@ -88,7 +83,6 @@ const Mainprofile = ({ user }) => {
       setisloading(false);
     }
   };
-
 
   return (
     <div>
@@ -133,11 +127,11 @@ const Mainprofile = ({ user }) => {
                   src={loggedinuser?.profileImage || user?.photoURL}
                   alt="avatar"
                   className="avatar"
-                  onClick={() => setShowAvatarPopup(true)} // SHOW POPUP
+                  onClick={() => setShowAvatarPopup(true)}
                 />
               </div>
 
-              {/* POPUP WINDOW */}
+              {/* AVATAR POPUP */}
               {showAvatarPopup && (
                 <div className="avatarPopup">
                   <div className="avatarPopupContent">
@@ -159,7 +153,6 @@ const Mainprofile = ({ user }) => {
                       Upload New
                       <input
                         type="file"
-                        id="profileUpload"
                         className="avatarUploadInput"
                         onChange={handleuploadprofileimage}
                       />
@@ -182,6 +175,22 @@ const Mainprofile = ({ user }) => {
                 </h3>
                 <p className="usernameSection">@{username}</p>
                 <Editprofile user={user} loggedinuser={loggedinuser} />
+              </div>
+
+              {/* LOCATION SECTION (CLEANED & FIXED) */}
+              <div className="userInfo">
+                <h3 className="heading-3">{user?.displayName}</h3>
+
+                <div className="locationAndLink">
+                  <span className="subInfo">
+                    📍 {location ? location : "Location not set"}
+                  </span>
+                </div>
+
+                {/* Location Button */}
+                <button onClick={handleGetLocation} className="getLocationBtn">
+                  Get My Location
+                </button>
               </div>
 
               <h4 className="tweetsText">Tweets</h4>

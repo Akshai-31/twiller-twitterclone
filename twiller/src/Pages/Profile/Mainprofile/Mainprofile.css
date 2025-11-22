@@ -234,3 +234,16 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+.getLocationBtn {
+  margin-top: 10px;
+  width: 200px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #1da1f2;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
