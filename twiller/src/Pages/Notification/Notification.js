@@ -1,50 +1,50 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import useLoggedinuser from "../../hooks/useLoggedinuser";
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
+import useLoggedinuser from '../../hooks/useLoggedinuser'
 
 // ⭐ Import MUI Components
-import { Card, CardContent, Typography, Button, Box } from "@mui/material";
+import { Card, CardContent, Typography, Button, Box } from '@mui/material'
 
 const Notifications = () => {
-  const [data, setData] = useState([]);
-  const [loggedinuser] = useLoggedinuser();
+  const [data, setData] = useState([])
+  const [loggedinuser] = useLoggedinuser()
 
   const loadData = () => {
     axios
-      .get("http://localhost:5000/notifications", {
+      .get(`${process.env.REACT_APP_API_URL}/notifications`, {
         params: { email: loggedinuser.email },
       })
-      .then((res) => setData(res.data));
-  };
+      .then((res) => setData(res.data))
+  }
 
   useEffect(() => {
-    if (loggedinuser) loadData();
-  }, [loggedinuser]);
+    if (loggedinuser) loadData()
+  }, [loggedinuser])
 
   const clearAll = () => {
     axios
-      .delete("http://localhost:5000/notifications/clear", {
+      .delete(`${process.env.REACT_APP_API_URL}/notifications/clear`, {
         data: { email: loggedinuser.email },
       })
-      .then(() => setData([]));
-  };
+      .then(() => setData([]))
+  }
 
   return (
-    <Box sx={{ padding: "20px" }}>
+    <Box sx={{ padding: '20px' }}>
       {/* HEADER CARD */}
       <Card
         sx={{
-          marginBottom: "20px",
-          padding: "10px",
-          borderRadius: "16px",
+          marginBottom: '20px',
+          padding: '10px',
+          borderRadius: '16px',
           boxShadow: 3,
         }}
       >
         <CardContent
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
           <Typography variant="h5" fontWeight="bold">
@@ -56,7 +56,7 @@ const Notifications = () => {
             color="error"
             onClick={clearAll}
             size="small"
-            sx={{ borderRadius: "20px", textTransform: "none" }}
+            sx={{ borderRadius: '20px', textTransform: 'none' }}
           >
             Clear All
           </Button>
@@ -68,7 +68,7 @@ const Notifications = () => {
         <Typography
           variant="body1"
           textAlign="center"
-          sx={{ marginTop: "40px", opacity: 0.7 }}
+          sx={{ marginTop: '40px', opacity: 0.7 }}
         >
           No notifications
         </Typography>
@@ -79,9 +79,9 @@ const Notifications = () => {
         <Card
           key={n._id}
           sx={{
-            marginBottom: "12px",
-            borderRadius: "16px",
-            padding: "10px",
+            marginBottom: '12px',
+            borderRadius: '16px',
+            padding: '10px',
             boxShadow: 2,
           }}
         >
@@ -91,7 +91,7 @@ const Notifications = () => {
         </Card>
       ))}
     </Box>
-  );
-};
+  )
+}
 
-export default Notifications;
+export default Notifications

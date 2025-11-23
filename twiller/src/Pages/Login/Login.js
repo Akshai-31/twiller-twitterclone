@@ -1,116 +1,115 @@
-import React, { useState } from "react";
-import twitterimg from "../../image/twitter.jpeg";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import GoogleButton from "react-google-button";
-import { useNavigate, Link } from "react-router-dom";
-import "./login.css";
-import { useUserAuth } from "../../context/UserAuthContext";
+import React, { useState } from 'react'
+import twitterimg from '../../image/twitter.jpeg'
+import TwitterIcon from '@mui/icons-material/Twitter'
+import GoogleButton from 'react-google-button'
+import { useNavigate, Link } from 'react-router-dom'
+import './login.css'
+import { useUserAuth } from '../../context/UserAuthContext'
 
 export function getDeviceInfo() {
-  const ua = navigator.userAgent;
+  const ua = navigator.userAgent
 
-  const isMobile = /Mobi|Android/i.test(ua);
-  const isEdge = /Edg/i.test(ua);
-  const isChrome = /Chrome/i.test(ua) && !isEdge;
+  const isMobile = /Mobi|Android/i.test(ua)
+  const isEdge = /Edg/i.test(ua)
+  const isChrome = /Chrome/i.test(ua) && !isEdge
 
-  return { isMobile, isEdge, isChrome };
+  return { isMobile, isEdge, isChrome }
 }
 
 export function isTimeAllowedForMobile() {
-  const time = new Date().toLocaleString("en-US", {
-    timeZone: "Asia/Kolkata",
-  });
-  const hour = new Date(time).getHours();
+  const time = new Date().toLocaleString('en-US', {
+    timeZone: 'Asia/Kolkata',
+  })
+  const hour = new Date(time).getHours()
 
-  return hour >= 10 && hour < 13;
+  return hour >= 10 && hour < 13
 }
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const { googleSignIn, logIn } = useUserAuth();
-  const { isMobile, isEdge } = getDeviceInfo();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const { googleSignIn, logIn } = useUserAuth()
+  const { isMobile, isEdge } = getDeviceInfo()
 
   // Normal login
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError('')
 
     // ✅ ADDED VALIDATION HERE
     if (!email.trim() || !password.trim()) {
-      setError("Please fill in both email and password.");
-      return; // Stop execution if fields are empty
+      setError('Please fill in both email and password.')
+      return // Stop execution if fields are empty
     }
 
     try {
       // Call login-check API
       if (isMobile) {
         if (!isTimeAllowedForMobile()) {
-          alert("⛔ Mobile login allowed only 10 AM - 1 PM IST");
-          return;
+          alert('⛔ Mobile login allowed only 10 AM - 1 PM IST')
+          return
         }
-        navigate("/otp", { state: { email, loginMethod: "normal", password } });
-        return;
+        navigate('/otp', { state: { email, loginMethod: 'normal', password } })
+        return
       }
 
       // Desktop Edge → Direct login
       if (isEdge) {
-        await logIn(email, password);
-        navigate("/");
-        return;
+        await logIn(email, password)
+        navigate('/')
+        return
       }
 
       // Desktop Chrome or Others → OTP required
-      navigate("/otp", { state: { email, loginMethod: "normal", password } });
+      navigate('/otp', { state: { email, loginMethod: 'normal', password } })
     } catch (err) {
-      setError(err.message);
-      alert(err.message);
+      setError(err.message)
+      alert(err.message)
     }
-  };
+  }
 
   // Google login
   const handleGoogleSignIn = async (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError('')
     try {
-      
-      const { isMobile, isEdge } = getDeviceInfo();
+      const { isMobile, isEdge } = getDeviceInfo()
 
       if (isMobile && !isTimeAllowedForMobile()) {
-        alert("⛔ Mobile login only between 10 AM - 1 PM IST");
-        return;
+        alert('⛔ Mobile login only between 10 AM - 1 PM IST')
+        return
       }
 
       if (isEdge) {
-        navigate("/");
-        return;
+        navigate('/')
+        return
       }
 
-      const result = await googleSignIn();
-      const user = result.user;
+      const result = await googleSignIn()
+      const user = result.user
       const newUser = {
-        username: user.email.split("@")[0],
+        username: user.email.split('@')[0],
         name: user.displayName,
         email: user.email,
         profileImage: user.photoURL,
-        coverImage: "",
-      };
+        coverImage: '',
+      }
 
       // Register user in DB
-      await fetch("http://localhost:5000/register", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
+      await fetch(`${process.env.REACT_APP_API_URL}/register`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify(newUser),
-      });
+      })
       // If OTP not required, login successful
-      navigate("/");
+      navigate('/')
     } catch (err) {
-      console.error(err.message);
-      alert("Google Sign-in Failed");
+      console.error(err.message)
+      alert('Google Sign-in Failed')
     }
-  };
+  }
 
   return (
     <div className="login-container">
@@ -119,12 +118,12 @@ const Login = () => {
       </div>
       <div className="form-container">
         <div className="form-box">
-          <TwitterIcon style={{ color: "skyblue" }} />
+          <TwitterIcon style={{ color: 'skyblue' }} />
           <h2 className="heading">Happening now</h2>
 
           {/* Error Message Display */}
-          {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
-          
+          {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
+
           <form onSubmit={handleSubmit}>
             <input
               type="email"
@@ -145,11 +144,11 @@ const Login = () => {
               <Link
                 to="/forgot-password"
                 style={{
-                  textDecoration: "none",
-                  color: "var(--twitter-color)",
-                  fontWeight: "600",
-                  marginTop: "10px",
-                  display: "block",
+                  textDecoration: 'none',
+                  color: 'var(--twitter-color)',
+                  fontWeight: '600',
+                  marginTop: '10px',
+                  display: 'block',
                 }}
               >
                 Forgot password?
@@ -158,7 +157,11 @@ const Login = () => {
           </form>
           <hr />
           <div>
-            <GoogleButton className="g-btn" type="light" onClick={handleGoogleSignIn} />
+            <GoogleButton
+              className="g-btn"
+              type="light"
+              onClick={handleGoogleSignIn}
+            />
           </div>
         </div>
         <div>
@@ -166,10 +169,10 @@ const Login = () => {
           <Link
             to="/signup"
             style={{
-              textDecoration: "none",
-              color: "var(--twitter-color)",
-              fontWeight: "600",
-              marginLeft: "5px",
+              textDecoration: 'none',
+              color: 'var(--twitter-color)',
+              fontWeight: '600',
+              marginLeft: '5px',
             }}
           >
             Sign Up
@@ -177,7 +180,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

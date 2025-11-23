@@ -1,43 +1,45 @@
-import React, { useState, useEffect } from "react";
-import Post from "../Posts/posts";
-import { useNavigate } from "react-router-dom";
-import "./Mainprofile.css";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CenterFocusWeakIcon from "@mui/icons-material/CenterFocusWeak";
-import Editprofile from "../Editprofile/Editprofile";
-import axios from "axios";
-import useLoggedinuser from "../../../hooks/useLoggedinuser";
-import GoogleMap from "../GoogleMap";  // ⭐ ADD THIS IMPORT
-import { uploadMediaToCloudinary } from "../../../utils/cloudinaryUpload";
-import NotificationsIcon from "@mui/icons-material/Notifications";          // filled
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";  // outlined
+import React, { useState, useEffect } from 'react'
+import Post from '../Posts/posts'
+import { useNavigate } from 'react-router-dom'
+import './Mainprofile.css'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
+import Editprofile from '../Editprofile/Editprofile'
+import axios from 'axios'
+import useLoggedinuser from '../../../hooks/useLoggedinuser'
+import GoogleMap from '../GoogleMap' // ⭐ ADD THIS IMPORT
+import { uploadMediaToCloudinary } from '../../../utils/cloudinaryUpload'
+import NotificationsIcon from '@mui/icons-material/Notifications' // filled
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone' // outlined
 
 const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
-  const navigate = useNavigate();
-  const [isloading, setisloading] = useState(false);
-  const [showAvatarPopup, setShowAvatarPopup] = useState(false);
-  const [loggedinuser] = useLoggedinuser();
-  const username = user?.email?.split("@")[0];
-  const [post, setpost] = useState([]);
+  const navigate = useNavigate()
+  const [isloading, setisloading] = useState(false)
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false)
+  const [loggedinuser] = useLoggedinuser()
+  const username = user?.email?.split('@')[0]
+  const [post, setpost] = useState([])
   const [notifToggle, setNotifToggle] = useState(
     loggedinuser?.isNotification ?? true
-  );
+  )
 
   const avatarList = ['/avatar/a1.jpg', '/avatar/a2.jpg', '/avatar/a3.jpg']
 
   // Fetch User Posts
   useEffect(() => {
-    fetch(`http://localhost:5000/userpost?email=${user?.email}`)
+    fetch(`${process.env.REACT_APP_API_URL}/userpost?email=${user?.email}`)
       .then((res) => res.json())
       .then((data) => setpost(data))
   }, [user.email])
 
-  
   const chooseAvatar = async (url) => {
     try {
-      await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
-        profileImage: url,
-      })
+      await axios.patch(
+        `${process.env.REACT_APP_API_URL}/userupdate/${user.email}`,
+        {
+          profileImage: url,
+        }
+      )
       setShowAvatarPopup(false)
       window.location.reload()
     } catch (err) {
@@ -53,11 +55,14 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
 
       const cloudRes = await uploadMediaToCloudinary(file)
 
-      await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
-        profileImage: cloudRes.secure_url,
-        publicId: cloudRes.public_id,
-        mediaType: cloudRes.resource_type,
-      })
+      await axios.patch(
+        `${process.env.REACT_APP_API_URL}/userupdate/${user?.email}`,
+        {
+          profileImage: cloudRes.secure_url,
+          publicId: cloudRes.public_id,
+          mediaType: cloudRes.resource_type,
+        }
+      )
 
       setisloading(false)
       window.location.reload()
@@ -67,13 +72,16 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
     }
   }
   const handleToggleNotification = async () => {
-    const newValue = !notifToggle;
-    setNotifToggle(newValue);
+    const newValue = !notifToggle
+    setNotifToggle(newValue)
 
-    await axios.patch(`http://localhost:5000/user/toggle-notification/${user.email}`, {
-      isNotification: newValue,
-    });
-  };
+    await axios.patch(
+      `${process.env.REACT_APP_API_URL}/user/toggle-notification/${user.email}`,
+      {
+        isNotification: newValue,
+      }
+    )
+  }
   return (
     <div>
       <ArrowBackIcon className="arrow-icon" onClick={() => navigate('/')} />
@@ -99,18 +107,20 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
                   id="coverUpload"
                   className="imageInput"
                   onChange={async (e) => {
-                    const file = e.target.files[0];
-                    const cloudRes = await uploadMediaToCloudinary(file);
+                    const file = e.target.files[0]
+                    const cloudRes = await uploadMediaToCloudinary(file)
 
-                    await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
-                      coverImage: cloudRes.secure_url,
-                      publicId: cloudRes.public_id,
-                      mediaType: cloudRes.resource_type,
-                    });
+                    await axios.patch(
+                      `${process.env.REACT_APP_API_URL}/userupdate/${user.email}`,
+                      {
+                        coverImage: cloudRes.secure_url,
+                        publicId: cloudRes.public_id,
+                        mediaType: cloudRes.resource_type,
+                      }
+                    )
 
-                    window.location.reload();
+                    window.location.reload()
                   }}
-
                 />
               </div>
             </div>
@@ -188,9 +198,10 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
               <div className="userInfo">
                 <div className="locationAndLink">
                   <span className="subInfo">
-                    📍 {location
+                    📍{' '}
+                    {location
                       ? `${location.state}, ${location.country}`
-                      : "Location not set"}
+                      : 'Location not set'}
                   </span>
                 </div>
 
@@ -202,7 +213,7 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
               {/* MAP + WEATHER SECTION ADDED HERE */}
               {location && (
                 <div className="mapCard">
-                 {/* <h3>Your Live Location</h3> */}
+                  {/* <h3>Your Live Location</h3> */}
                   <GoogleMap
                     latitude={location.latitude}
                     longitude={location.longitude}

@@ -1,39 +1,35 @@
-import React, { useEffect, useState } from "react";
-import "./Feed.css";
-import Posts from "./Posts/Posts";
-import Tweetbox from "./Tweetbox/Tweetbox";
-import { useUserAuth } from "../../context/UserAuthContext";
-
-
+import React, { useEffect, useState } from 'react'
+import './Feed.css'
+import Posts from './Posts/Posts'
+import Tweetbox from './Tweetbox/Tweetbox'
+import { useUserAuth } from '../../context/UserAuthContext'
 
 const Feed = () => {
-  const [posts, setPosts] = useState([]);
-  const [activeTab, setActiveTab] = useState("home");
+  const [posts, setPosts] = useState([])
+  const [activeTab, setActiveTab] = useState('home')
 
- const { user } = useUserAuth();
+  const { user } = useUserAuth()
 
   const loadHomeFeed = () => {
-    fetch("http://localhost:5000/post")
+    fetch(`${process.env.REACT_APP_API_URL}/post`)
       .then((res) => res.json())
-      .then((data) => setPosts(data));
-  };
+      .then((data) => setPosts(data))
+  }
 
   const loadFollowingFeed = () => {
-    fetch(`http://localhost:5000/feed/following?email=${user.email}`)
+    fetch(`${process.env.REACT_APP_API_URL}/feed/following?email=${user.email}`)
       .then((res) => res.json())
-      .then((data) => setPosts(data));
-  };
-
-
+      .then((data) => setPosts(data))
+  }
 
   useEffect(() => {
-    if (activeTab === "home") loadHomeFeed();
-    if (activeTab === "following") loadFollowingFeed();
-  }, [activeTab]);
+    if (activeTab === 'home') loadHomeFeed()
+    if (activeTab === 'following') loadFollowingFeed()
+  }, [activeTab])
 
   const reloadPosts = () => {
-    if (activeTab === "home") loadHomeFeed();
-  };
+    if (activeTab === 'home') loadHomeFeed()
+  }
 
   return (
     <div className="feed">
@@ -43,27 +39,27 @@ const Feed = () => {
 
       <div className="feed-tabs">
         <button
-          className={activeTab === "home" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("home")}
+          className={activeTab === 'home' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('home')}
         >
           General
         </button>
 
         <button
-          className={activeTab === "following" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("following")}
+          className={activeTab === 'following' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('following')}
         >
           Following
         </button>
       </div>
 
-      {activeTab === "home" && <Tweetbox reloadPosts={reloadPosts} />}
+      {activeTab === 'home' && <Tweetbox reloadPosts={reloadPosts} />}
 
       {posts.map((p) => (
         <Posts key={p._id} p={p} />
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default Feed;
+export default Feed

@@ -1,56 +1,56 @@
-import React, { useState } from "react";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import HomeIcon from "@mui/icons-material/Home";
-import SearchIcon from "@mui/icons-material/Search";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import PermIdentityIcon from "@mui/icons-material/PermIdentity";
-import MoreIcon from "@mui/icons-material/More";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import Divider from "@mui/material/Divider";
-import DoneIcon from "@mui/icons-material/Done";
-import Button from "@mui/material/Button";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import { Avatar } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import "./sidebar.css";
-import Customlink from "./Customlink";
-import Sidebaroption from "./Sidebaroption";
-import { useNavigate } from "react-router-dom";
-import useLoggedinuser from "../../hooks/useLoggedinuser"
+import React, { useState } from 'react'
+import TwitterIcon from '@mui/icons-material/Twitter'
+import HomeIcon from '@mui/icons-material/Home'
+import SearchIcon from '@mui/icons-material/Search'
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
+import MailOutlineIcon from '@mui/icons-material/MailOutline'
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder'
+import ListAltIcon from '@mui/icons-material/ListAlt'
+import PermIdentityIcon from '@mui/icons-material/PermIdentity'
+import MoreIcon from '@mui/icons-material/More'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import Divider from '@mui/material/Divider'
+import DoneIcon from '@mui/icons-material/Done'
+import Button from '@mui/material/Button'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import { Avatar } from '@mui/material'
+import IconButton from '@mui/material/IconButton'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import './sidebar.css'
+import Customlink from './Customlink'
+import Sidebaroption from './Sidebaroption'
+import { useNavigate } from 'react-router-dom'
+import useLoggedinuser from '../../hooks/useLoggedinuser'
 
-import { useEffect } from "react";
-import axios from "axios";
+import { useEffect } from 'react'
+import axios from 'axios'
 
 const Sidebar = ({ handlelogout, user }) => {
-  const [anchorE1, setanchorE1] = useState(null);
-  const openmenu = Boolean(anchorE1);
-  const [ loggedinuser] = useLoggedinuser();
-  const navigate = useNavigate();
+  const [anchorE1, setanchorE1] = useState(null)
+  const openmenu = Boolean(anchorE1)
+  const [loggedinuser] = useLoggedinuser()
+  const navigate = useNavigate()
   const handleclick = (e) => {
-    setanchorE1(e.currentTarget);
+    setanchorE1(e.currentTarget)
     // console.log(e.currentTarget);
-  };
+  }
   const handleclose = () => {
-    setanchorE1(null);
-  };
-  const result = user?.email?.split("@")[0];
-const [notifCount, setNotifCount] = useState(0);
+    setanchorE1(null)
+  }
+  const result = user?.email?.split('@')[0]
+  const [notifCount, setNotifCount] = useState(0)
 
-useEffect(() => {
-  if (!loggedinuser?.email) return;
+  useEffect(() => {
+    if (!loggedinuser?.email) return
 
-  axios
-    .get("http://localhost:5000/notifications/count", {
-      params: { email: loggedinuser.email },
-    })
-    .then((res) => setNotifCount(res.data.count))
-    .catch((err) => console.log(err));
-}, [loggedinuser]);
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/notifications/count`, {
+        params: { email: loggedinuser.email },
+      })
+      .then((res) => setNotifCount(res.data.count))
+      .catch((err) => console.log(err))
+  }, [loggedinuser])
 
   return (
     <div className="sidebar">
@@ -62,8 +62,11 @@ useEffect(() => {
         <Sidebaroption Icon={SearchIcon} text="Explore" />
       </Customlink>
       <Customlink to="/home/notification">
-        <Sidebaroption Icon={NotificationsNoneIcon} text="Notifications" badgeCount={notifCount} />
-
+        <Sidebaroption
+          Icon={NotificationsNoneIcon}
+          text="Notifications"
+          badgeCount={notifCount}
+        />
       </Customlink>
       <Customlink to="/home/messages">
         <Sidebaroption Icon={MailOutlineIcon} text="Messages" />
@@ -94,18 +97,16 @@ useEffect(() => {
         />
         <div className="user__info">
           <h4>
-            {loggedinuser?.name
-              ? loggedinuser.name
-              : user && user.displayName}
+            {loggedinuser?.name ? loggedinuser.name : user && user.displayName}
           </h4>
           <h5>@{result}</h5>
         </div>
         <IconButton
           size="small"
           sx={{ ml: 2 }}
-          aria-controls={openmenu ? "basic-menu" : undefined}
+          aria-controls={openmenu ? 'basic-menu' : undefined}
           aria-haspopup="true"
-          aria-valuetext={openmenu ? "true" : undefined}
+          aria-valuetext={openmenu ? 'true' : undefined}
           onClick={handleclick}
         >
           <MoreHorizIcon />
@@ -119,14 +120,14 @@ useEffect(() => {
         >
           <MenuItem
             className="Profile__info1"
-            onClick={() => navigate("/home/profile")}
+            onClick={() => navigate('/home/profile')}
           >
             <Avatar
               src={
                 loggedinuser?.profileImage
                   ? loggedinuser?.profileImage
                   : user && user.photoURL
-                  // : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
+                // : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
               }
             />
             <div className="user__info subUser__info">
@@ -149,7 +150,7 @@ useEffect(() => {
         </Menu>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

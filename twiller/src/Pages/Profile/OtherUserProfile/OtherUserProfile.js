@@ -1,94 +1,94 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import Post from "../Posts/posts";
-import "./OtherUserProfile.css";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import useLoggedinuser from "../../../hooks/useLoggedinuser";
-import GoogleMap from "../GoogleMap";
+import React, { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import Post from '../Posts/posts'
+import './OtherUserProfile.css'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import useLoggedinuser from '../../../hooks/useLoggedinuser'
+import GoogleMap from '../GoogleMap'
 
 const OtherUserProfile = () => {
-  const { email } = useParams();
-  const navigate = useNavigate();
-  const [loggedinuser] = useLoggedinuser();
+  const { email } = useParams()
+  const navigate = useNavigate()
+  const [loggedinuser] = useLoggedinuser()
 
-  const [profile, setProfile] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [location, setLocation] = useState(null);
-  const [weather, setWeather] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [profile, setProfile] = useState(null)
+  const [posts, setPosts] = useState([])
+  const [location, setLocation] = useState(null)
+  const [weather, setWeather] = useState(null)
+  const [isFollowing, setIsFollowing] = useState(false)
 
-  const WEATHER_KEY = "e064b116f8820c72fdcb38ecdff6e4b1";
+  const WEATHER_KEY = 'e064b116f8820c72fdcb38ecdff6e4b1'
 
   // 1. Load profile info
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/loggedinuser?email=${email}`)
+      .get(`${process.env.REACT_APP_API_URL}/loggedinuser?email=${email}`)
       .then((res) => setProfile(res.data))
-      .catch((e) => console.log(e));
-  }, [email]);
+      .catch((e) => console.log(e))
+  }, [email])
 
   // 2. Load posts
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/userpost?email=${email}`)
-      .then((res) => setPosts(res.data));
-  }, [email]);
+      .get(`${process.env.REACT_APP_API_URL}/userpost?email=${email}`)
+      .then((res) => setPosts(res.data))
+  }, [email])
 
   // 3. Load location & weather of that user automatically
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/get-location?email=${email}`)
+      .get(`${process.env.REACT_APP_API_URL}/get-location?email=${email}`)
       .then((res) => {
         if (res.data.location) {
-          const loc = res.data.location;
-          setLocation(loc);
+          const loc = res.data.location
+          setLocation(loc)
 
           axios
             .get(
               `https://api.openweathermap.org/data/2.5/weather?lat=${loc.latitude}&lon=${loc.longitude}&appid=${WEATHER_KEY}&units=metric`
             )
-            .then((w) => setWeather(w.data));
+            .then((w) => setWeather(w.data))
         }
       })
-      .catch(() => {});
-  }, [email]);
+      .catch(() => {})
+  }, [email])
 
   // 4. Check follow status
   useEffect(() => {
     axios
-      .get("http://localhost:5000/follow/status", {
+      .get(`${process.env.REACT_APP_API_URL}/follow/status`, {
         params: { currentUser: loggedinuser?.email, targetUser: email },
       })
       .then((res) => setIsFollowing(res.data.following))
-      .catch(() => setIsFollowing(false));
-  }, [email, loggedinuser]);
+      .catch(() => setIsFollowing(false))
+  }, [email, loggedinuser])
 
   // 5. Follow
   const followUser = async () => {
-    await axios.post("http://localhost:5000/follow", {
+    await axios.post(`${process.env.REACT_APP_API_URL}/follow`, {
       currentUser: loggedinuser.email,
       targetUser: email,
-    });
-    setIsFollowing(true);
-  };
+    })
+    setIsFollowing(true)
+  }
 
   // 6. Unfollow
   const unfollowUser = async () => {
-    await axios.post("http://localhost:5000/unfollow", {
+    await axios.post(`${process.env.REACT_APP_API_URL}/unfollow`, {
       currentUser: loggedinuser.email,
       targetUser: email,
-    });
-    setIsFollowing(false);
-  };
+    })
+    setIsFollowing(false)
+  }
 
-  if (!profile) return <div>Loading...</div>;
+  if (!profile) return <div>Loading...</div>
 
-  const username = profile.email.split("@")[0];
+  const username = profile.email.split('@')[0]
 
   return (
     <div className="otherProfilePage">
-      <ArrowBackIcon className="arrow-icon" onClick={() => navigate("/")} />
+      <ArrowBackIcon className="arrow-icon" onClick={() => navigate('/')} />
       <h4 className="heading-4">{username}</h4>
 
       <div className="mainprofile">
@@ -96,7 +96,7 @@ const OtherUserProfile = () => {
           {/* COVER IMAGE */}
           <div className="coverImageContainer">
             <img
-              src={profile.coverImage || "/default-cover.jpg"}
+              src={profile.coverImage || '/default-cover.jpg'}
               alt="cover"
               className="coverImage"
             />
@@ -106,7 +106,7 @@ const OtherUserProfile = () => {
           <div className="avatar-img">
             <div className="avatarContainer">
               <img
-                src={profile.profileImage || "/avatar/a1.jpg"}
+                src={profile.profileImage || '/avatar/a1.jpg'}
                 alt="avatar"
                 className="avatar"
               />
@@ -172,7 +172,7 @@ const OtherUserProfile = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default OtherUserProfile;
+export default OtherUserProfile

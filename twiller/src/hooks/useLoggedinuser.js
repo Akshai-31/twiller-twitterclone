@@ -11,7 +11,7 @@ const useLoggedinuser = () => {
     if (!email) return; // ✅ Skip API call if no email yet
 
     setLoading(true);
-    fetch(`http://localhost:5000/loggedinuser?email=${email}`)
+    fetch(`${process.env.REACT_APP_API_URL}/loggedinuser?email=${email}`)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.text();

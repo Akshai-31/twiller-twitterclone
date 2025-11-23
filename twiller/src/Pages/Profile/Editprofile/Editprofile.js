@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Box, Modal, IconButton, TextField } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import "./Editprofile.css";
+import React, { useEffect, useState } from 'react'
+import { Box, Modal, IconButton, TextField } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import './Editprofile.css'
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
   width: 600,
   height: 600,
-  bgcolor: "background.paper",
+  bgcolor: 'background.paper',
   boxShadow: 24,
   borderRadius: 8,
-};
+}
 
 function Editchild({ dob, setdob }) {
-  const [open, setopen] = useState(false);
+  const [open, setopen] = useState(false)
 
   return (
     <>
@@ -52,69 +52,69 @@ function Editchild({ dob, setdob }) {
         </Box>
       </Modal>
     </>
-  );
+  )
 }
 
 const Editprofile = ({ user }) => {
-  const [name, setname] = useState("");
-  const [bio, setbio] = useState("");
-  const [location, setlocation] = useState("");
-  const [website, setwebsite] = useState("");
-  const [dob, setdob] = useState("");
-  const [open, setopen] = useState(false);
-  const [loggedinuser, setloggedinuser] = useState(null);
+  const [name, setname] = useState('')
+  const [bio, setbio] = useState('')
+  const [location, setlocation] = useState('')
+  const [website, setwebsite] = useState('')
+  const [dob, setdob] = useState('')
+  const [open, setopen] = useState(false)
+  const [loggedinuser, setloggedinuser] = useState(null)
 
   // ✅ Load from localStorage or fetch if missing
   useEffect(() => {
-    const stored = localStorage.getItem("loggedinuser");
+    const stored = localStorage.getItem('loggedinuser')
     if (stored) {
-      const parsed = JSON.parse(stored);
-      setloggedinuser(parsed);
-      setname(parsed.name || "");
-      setbio(parsed.bio || "");
-      setlocation(parsed.location || "");
-      setwebsite(parsed.website || "");
-      setdob(parsed.dob || "");
+      const parsed = JSON.parse(stored)
+      setloggedinuser(parsed)
+      setname(parsed.name || '')
+      setbio(parsed.bio || '')
+      setlocation(parsed.location || '')
+      setwebsite(parsed.website || '')
+      setdob(parsed.dob || '')
     } else if (user?.email) {
-      fetch(`http://localhost:5000/loggedinuser?email=${user.email}`)
+      fetch(`${process.env.REACT_APP_API_URL}/loggedinuser?email=${user.email}`)
         .then((res) => res.json())
         .then((data) => {
-          const userData = data[0] || {};
-          setloggedinuser(userData);
-          localStorage.setItem("loggedinuser", JSON.stringify(userData));
-          setname(userData.name || "");
-          setbio(userData.bio || "");
-          setlocation(userData.location || "");
-          setwebsite(userData.website || "");
-          setdob(userData.dob || "");
+          const userData = data[0] || {}
+          setloggedinuser(userData)
+          localStorage.setItem('loggedinuser', JSON.stringify(userData))
+          setname(userData.name || '')
+          setbio(userData.bio || '')
+          setlocation(userData.location || '')
+          setwebsite(userData.website || '')
+          setdob(userData.dob || '')
         })
-        .catch((err) => console.error("Error fetching user:", err));
+        .catch((err) => console.error('Error fetching user:', err))
     }
-  }, [user]);
+  }, [user])
 
   // ✅ Handle save
   const handlesave = () => {
-    if (!user?.email) return alert("User not logged in!");
+    if (!user?.email) return alert('User not logged in!')
 
-    const editinfo = { name, bio, location, website, dob };
+    const editinfo = { name, bio, location, website, dob }
 
-    fetch(`http://localhost:5000/userupdate/${user.email}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
+    fetch(`${process.env.REACT_APP_API_URL}/userupdate/${user.email}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(editinfo),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Profile updated:", data);
-        alert("Profile updated successfully!");
+        console.log('Profile updated:', data)
+        alert('Profile updated successfully!')
         localStorage.setItem(
-          "loggedinuser",
+          'loggedinuser',
           JSON.stringify({ ...loggedinuser, ...editinfo })
-        );
-        setopen(false);
+        )
+        setopen(false)
       })
-      .catch((err) => console.error("Error updating profile:", err));
-  };
+      .catch((err) => console.error('Error updating profile:', err))
+  }
 
   return (
     <div>
@@ -181,7 +181,7 @@ const Editprofile = ({ user }) => {
           </div>
 
           <div className="last-section">
-            <h2>{dob ? dob : "Add your date of birth"}</h2>
+            <h2>{dob ? dob : 'Add your date of birth'}</h2>
             <div className="last-btn">
               <h2>Switch to Professional</h2>
               <ChevronRightIcon />
@@ -190,7 +190,7 @@ const Editprofile = ({ user }) => {
         </Box>
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export default Editprofile;
+export default Editprofile

@@ -1,83 +1,83 @@
-import React, { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import twitterimg from "../../image/twitter.jpeg";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import GoogleButton from "react-google-button";
-import { useUserAuth } from "../../context/UserAuthContext";
-import "./login.css";
+import React, { useState, useContext } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import twitterimg from '../../image/twitter.jpeg'
+import TwitterIcon from '@mui/icons-material/Twitter'
+import GoogleButton from 'react-google-button'
+import { useUserAuth } from '../../context/UserAuthContext'
+import './login.css'
 //import "./forgotpassword.css";
 const Signup = () => {
-  const [username, setusername] = useState("");
-  const [name, setname] = useState("");
-  const [email, setemail] = useState("");
-  const [error, seterror] = useState("");
-  const [password, setpassword] = useState("");
-  const { signUp } = useUserAuth();
-  const { googleSignIn } = useUserAuth();
-  const navigate = useNavigate();
+  const [username, setusername] = useState('')
+  const [name, setname] = useState('')
+  const [email, setemail] = useState('')
+  const [error, seterror] = useState('')
+  const [password, setpassword] = useState('')
+  const { signUp } = useUserAuth()
+  const { googleSignIn } = useUserAuth()
+  const navigate = useNavigate()
 
   const handlesubmit = async (e) => {
-    e.preventDefault();
-    seterror("");
+    e.preventDefault()
+    seterror('')
     try {
-      await signUp(email, password);
+      await signUp(email, password)
       const user = {
         username: username,
         name: name,
         email: email,
-      };
-      fetch("http://localhost:5000/register", {
-        method: "POST",
+      }
+      fetch(`${process.env.REACT_APP_API_URL}/register`, {
+        method: 'POST',
         headers: {
-          "content-type": "application/json",
+          'content-type': 'application/json',
         },
         body: JSON.stringify(user),
       })
         .then((res) => res.json())
         .then((data) => {
           if (data.acknowledged) {
-            console.log(data);
-            navigate("/");
+            console.log(data)
+            navigate('/')
           }
-        });
+        })
     } catch (error) {
-      seterror(error.message);
-      window.alert(error.message);
+      seterror(error.message)
+      window.alert(error.message)
     }
-  };
-const hanglegooglesignin = async (e) => {
-  console.log("Google Sign-in initiated");
-  e.preventDefault();
-  try {
-    const result = await googleSignIn();
-    const user = result.user;
-console.log(user);
-    // Google user details
-    const newUser = {
-      username: user.email.split("@")[0],
-      name: user.displayName,
-      email: user.email,
-      profileImage: user.photoURL,
-      coverImage: "",  // initially empty
-    };
-
-    // Check or insert user in MongoDB
-    const res = await fetch("http://localhost:5000/register", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(newUser),
-    });
-
-    const data = await res.json();
-
-    navigate("/");
-  } catch (error) {
-    console.log(error.message);
-    alert("Google Sign-in Failed");
   }
-};
+  const hanglegooglesignin = async (e) => {
+    console.log('Google Sign-in initiated')
+    e.preventDefault()
+    try {
+      const result = await googleSignIn()
+      const user = result.user
+      console.log(user)
+      // Google user details
+      const newUser = {
+        username: user.email.split('@')[0],
+        name: user.displayName,
+        email: user.email,
+        profileImage: user.photoURL,
+        coverImage: '', // initially empty
+      }
+
+      // Check or insert user in MongoDB
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      })
+
+      const data = await res.json()
+
+      navigate('/')
+    } catch (error) {
+      console.log(error.message)
+      alert('Google Sign-in Failed')
+    }
+  }
 
   return (
     <>
@@ -88,7 +88,7 @@ console.log(user);
 
         <div className="form-container">
           <div className="">
-            <TwitterIcon className="Twittericon" style={{ color: "skyblue" }} />
+            <TwitterIcon className="Twittericon" style={{ color: 'skyblue' }} />
             <h2 className="heading">Happening now</h2>
             <div class="d-flex align-items-sm-center">
               <h3 className="heading1"> Join twiller today</h3>
@@ -138,10 +138,10 @@ console.log(user);
               <Link
                 to="/login"
                 style={{
-                  textDecoration: "none",
-                  color: "var(--twitter-color)",
-                  fontWeight: "600",
-                  marginLeft: "5px",
+                  textDecoration: 'none',
+                  color: 'var(--twitter-color)',
+                  fontWeight: '600',
+                  marginLeft: '5px',
                 }}
               >
                 Log In
@@ -151,7 +151,7 @@ console.log(user);
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Signup;
+export default Signup
