@@ -9,7 +9,8 @@ import axios from "axios";
 import useLoggedinuser from "../../../hooks/useLoggedinuser";
 import GoogleMap from "../GoogleMap";  // ⭐ ADD THIS IMPORT
 import { uploadMediaToCloudinary } from "../../../utils/cloudinaryUpload";
-
+import NotificationsIcon from "@mui/icons-material/Notifications";          // filled
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";  // outlined
 
 const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
   const [loggedinuser] = useLoggedinuser();
   const username = user?.email?.split("@")[0];
   const [post, setpost] = useState([]);
+  const [notifToggle, setNotifToggle] = useState(
+    loggedinuser?.isNotification ?? true
+  );
 
   const avatarList = ['/avatar/a1.jpg', '/avatar/a2.jpg', '/avatar/a3.jpg']
 
@@ -62,7 +66,14 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
       setisloading(false)
     }
   }
+  const handleToggleNotification = async () => {
+    const newValue = !notifToggle;
+    setNotifToggle(newValue);
 
+    await axios.patch(`http://localhost:5000/user/toggle-notification/${user.email}`, {
+      isNotification: newValue,
+    });
+  };
   return (
     <div>
       <ArrowBackIcon className="arrow-icon" onClick={() => navigate('/')} />
@@ -160,7 +171,19 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
                 <p className="usernameSection">@{username}</p>
                 <Editprofile user={user} loggedinuser={loggedinuser} />
               </div>
-
+              <div className="notificationIconContainer">
+                {notifToggle ? (
+                  <NotificationsIcon
+                    className="notifIcon activeNotif"
+                    onClick={handleToggleNotification}
+                  />
+                ) : (
+                  <NotificationsNoneIcon
+                    className="notifIcon"
+                    onClick={handleToggleNotification}
+                  />
+                )}
+              </div>
               {/* LOCATION SECTION */}
               <div className="userInfo">
                 <div className="locationAndLink">
