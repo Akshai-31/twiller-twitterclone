@@ -22,3 +22,25 @@
     font-size: 20px;
     font-weight: 800;
   }
+
+  .feed-tabs {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid #333;
+  margin-bottom: 10px;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  color: black;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.tab.active {
+  border-bottom: 3px solid #1DA1F2;
+  font-weight: bold;
+}

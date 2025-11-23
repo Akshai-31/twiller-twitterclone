@@ -1,0 +1,40 @@
+/* src/Pages/Profile/OtherUserProfile.css */
+.other-profile-card {
+  padding: 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  max-width: 700px;
+  margin: 16px auto;
+  background: #fff;
+}
+.other-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.other-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.other-info h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.other-info p {
+  margin: 0;
+  color: #666;
+}
+.follow-action {
+  margin-left: auto;
+}
+.follow-btn, .unfollow-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.follow-btn { background: #1da1f2; color: white; }
+.unfollow-btn { background: #fff; color: #333; border: 1px solid #ccc; }
+.other-bio { margin-top: 12px; color: #333; }
