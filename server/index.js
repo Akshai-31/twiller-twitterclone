@@ -38,6 +38,8 @@ async function run() {
     const followersCollection = db.collection("followers"); // <-- new
     const otpCollection = db.collection("otp");
     const loginInfoCollection = db.collection("loginInfos");
+const notificationsCollection = db.collection("notifications");
+
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -78,29 +80,46 @@ async function run() {
     // ---------------- FOLLOW / UNFOLLOW / STATUS ----------------
 
     // FOLLOW
-    app.post("/follow", async (req, res) => {
-      const { currentUser, targetUser } = req.body;
-      if (!currentUser || !targetUser) return res.status(400).send({ error: "Missing data" });
+app.post("/follow", async (req, res) => {
+  const { currentUser, targetUser } = req.body;
 
-      try {
-        await followersCollection.updateOne(
-          { userId: targetUser },
-          { $addToSet: { followers: currentUser } },
-          { upsert: true }
-        );
+  if (!currentUser || !targetUser)
+    return res.status(400).send({ error: "Missing data" });
 
-        await followersCollection.updateOne(
-          { userId: currentUser },
-          { $addToSet: { following: targetUser } },
-          { upsert: true }
-        );
+  try {
+    // Add followers
+    await followersCollection.updateOne(
+      { userId: targetUser },
+      { $addToSet: { followers: currentUser } },
+      { upsert: true }
+    );
 
-        res.send({ success: true, message: "Followed successfully" });
-      } catch (err) {
-        console.error("follow error:", err);
-        res.status(500).send({ error: "Something went wrong" });
-      }
-    });
+    await followersCollection.updateOne(
+      { userId: currentUser },
+      { $addToSet: { following: targetUser } },
+      { upsert: true }
+    );
+
+    // ⭐ CHECK TARGET USER NOTIFICATION SETTINGS
+    const userB = await usercollection.findOne({ email: targetUser });
+
+    if (userB?.isNotification === true) {
+      await notificationsCollection.insertOne({
+        user: targetUser,
+        message: `${currentUser} started following you`,
+        isRead:false,
+        createdAt: new Date(),
+      });
+    }
+
+    res.send({ success: true });
+  } catch (err) {
+    console.log("follow error:", err);
+    res.status(500).send({ error: "Something went wrong" });
+  }
+});
+
+
 
     // UNFOLLOW
     app.post("/unfollow", async (req, res) => {
@@ -196,87 +215,122 @@ async function run() {
     });
 
     // ---------------- CREATE POST (with posting rules) ----------------
-    function isTimeInRange(startHour, startMin, endHour, endMin) {
-      const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-      const current = new Date(now);
+    
 
-      const start = new Date(current);
-      start.setHours(startHour, startMin, 0, 0);
+    // ---------------- CREATE POST (UPDATED RULES) ----------------
+function isTimeInRange(startHour, startMin, endHour, endMin) {
+  const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+  const current = new Date(now);
 
-      const end = new Date(current);
-      end.setHours(endHour, endMin, 0, 0);
+  const start = new Date(current);
+  start.setHours(startHour, startMin, 0, 0);
 
-      return current >= start && current <= end;
+  const end = new Date(current);
+  end.setHours(endHour, endMin, 0, 0);
+
+  return current >= start && current <= end;
+}
+
+app.post("/post", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).send({ error: "Missing email" });
+
+    // get followers
+    const followData = await followersCollection.findOne({ userId: email });
+    const following = followData?.following?.length || 0;
+
+    const today = new Date().toLocaleDateString("en-US", {
+      timeZone: "Asia/Kolkata",
+    });
+
+    const todaysPosts = await postcollection.countDocuments({
+      email,
+      postedDate: today,
+      isText: true,
+    });
+
+    // ----------- RULE 1: 0 followers ------------
+    if (following === 0) {
+      if (!isTimeInRange(10, 0, 10, 30)) {
+        return res.status(400).send({
+          errorType: "time",
+          error: "Posting allowed only 10:00 AM - 10:30 AM IST",
+        });
+      }
+
+      if (todaysPosts >= 1) {
+        return res.status(400).send({
+          errorType: "limit",
+          error: "Only 1 post allowed today",
+        });
+      }
     }
 
-    app.post("/post", async (req, res) => {
-      try {
-        const { email } = req.body;
+    // ----------- RULE 2: exactly 2 followers ------------
+    if (following <= 2 && todaysPosts >= 2) {
+      return res.status(400).send({
+        errorType: "limit",
+        error: "Max 2 posts allowed per day",
+      });
+    }
 
-        if (!email) return res.status(400).send({ error: "Missing email" });
+    // ----------- RULE 3: 10+ followers → unlimited posts ------------
+    if (following > 10) {
+      // unlimited posting
+    }
 
-        const user = await usercollection.findOne({ email });
-
-        if (!user) {
-          return res.status(404).send({ error: "User not found" });
-        }
-
-        // get followers count from followersCollection
-        const followData = await followersCollection.findOne({ userId: email });
-        const followers = followData?.followers?.length || 0;
-
-        const today = new Date().toLocaleDateString("en-US", {
-          timeZone: "Asia/Kolkata",
+    // ----------- RULE 4: 3–9 followers (default 1 post/day) ------------
+    if (following >= 3 && following < 10) {
+      if (todaysPosts >= 2) {
+        return res.status(400).send({
+          errorType: "limit",
+          error: "Only 1 post allowed per day",
         });
-
-        const todaysPosts = await postcollection.countDocuments({
-          email,
-          postedDate: today,
-          isText: true,
-        });
-
-        // --------- NO FOLLOWERS RULE (ONLY 10:00 AM - 10:30 AM) ----------
-        if (followers === 0) {
-          if (!isTimeInRange(10, 0, 10, 30)) {
-            return res.status(400).send({
-              errorType: "time",
-              error: "Posting allowed only 10:00 AM - 10:30 AM IST",
-            });
-          }
-          if (todaysPosts >= 1) {
-            return res.status(400).send({
-              errorType: "limit",
-              error: "Only 1 post allowed today",
-            });
-          }
-        }
-
-        // ------------ EXACTLY 2 FOLLOWERS (MAX 2 POSTS PER DAY) ------------
-        if (followers === 2 && todaysPosts >= 2) {
-          return res.status(400).send({
-            errorType: "limit",
-            error: "Max 2 posts allowed per day",
-          });
-        }
-
-        // 10+ followers → unlimited posts → no checks
-
-        // -------- SAVE POST ---------
-        const newPost = {
-          ...req.body,
-          postedDate: today,
-          isText: true,
-          createdAt: new Date(),
-        };
-
-        const result = await postcollection.insertOne(newPost);
-
-        res.status(201).send(result);
-      } catch (err) {
-        console.log(err);
-        res.status(500).send({ errorType: "server", error: "Server error" });
       }
-    });
+    }
+
+    // SAVE POST
+    const newPost = {
+      ...req.body,
+      postedDate: today,
+      isText: true,
+      createdAt: new Date(),
+    };
+
+    const result = await postcollection.insertOne(newPost);
+
+    // ========================================================
+    // ⭐ NEW CODE FOR NOTIFICATIONS
+    // Notify only followers who enabled notifications
+    // ========================================================
+
+    const followerList = followData?.followers || [];
+
+    for (let followerEmail of followerList) {
+      const followerData = await usercollection.findOne({ email: followerEmail });
+
+      if (followerData?.isNotification === true) {
+        await notificationsCollection.insertOne({
+          user: followerEmail,
+          message: `${email} posted a new tweet`,
+          postId: result.insertedId,
+          isRead: false,
+          createdAt: new Date(),
+        });
+      }
+    }
+
+    // ========================================================
+
+    res.status(201).send(result);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ errorType: "server", error: "Server error" });
+  }
+});
+
 
     // ---------------- GET ALL POSTS ----------------
     app.get("/post", async (req, res) => {
@@ -404,6 +458,63 @@ async function run() {
         res.status(500).json({ error: "Internal server error" });
       }
     });
+// enable/disable notification for a specific user
+app.post("/follow/notification-toggle", async (req, res) => {
+  const { currentUser, targetUser, enable } = req.body;
+
+  await followersCollection.updateOne(
+    { currentUser, targetUser },
+    { $set: { notifications: enable } }
+  );
+
+  res.send({ success: true });
+});
+// GET NOTIFICATIONS
+app.get("/notifications", async (req, res) => {
+  const { email } = req.query;
+
+  const data = await notificationsCollection
+    .find({ user: email })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  res.send(data);
+});
+// GET UNREAD NOTIFICATION COUNT
+app.get("/notifications/count", async (req, res) => {
+  const { email } = req.query;
+
+  const count = await notificationsCollection.countDocuments({
+    user: email,
+    isRead: false,
+  });
+
+  res.send({ count });
+});
+// CLEAR ALL NOTIFICATIONS
+app.delete("/notifications/clear", async (req, res) => {
+  const { email } = req.body;
+
+  await notificationsCollection.deleteMany({ user: email });
+
+  res.send({ success: true });
+});
+// UPDATE USER NOTIFICATION TOGGLE
+app.patch("/user/toggle-notification/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    const { isNotification } = req.body;
+
+    await usercollection.updateOne(
+      { email },
+      { $set: { isNotification } }
+    );
+
+    res.send({ success: true, isNotification });
+  } catch (err) {
+    res.status(500).send({ error: "Failed to update" });
+  }
+});
 
     console.log("✅ MongoDB connected successfully");
 
