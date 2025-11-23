@@ -38,6 +38,12 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
+    // ✅ ADDED VALIDATION HERE
+    if (!email.trim() || !password.trim()) {
+      setError("Please fill in both email and password.");
+      return; // Stop execution if fields are empty
+    }
+
     try {
       // Call login-check API
       if (isMobile) {
@@ -115,7 +121,10 @@ const Login = () => {
         <div className="form-box">
           <TwitterIcon style={{ color: "skyblue" }} />
           <h2 className="heading">Happening now</h2>
-          {error && <p>{error}</p>}
+
+          {/* Error Message Display */}
+          {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+          
           <form onSubmit={handleSubmit}>
             <input
               type="email"
