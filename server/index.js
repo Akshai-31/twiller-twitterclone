@@ -42,20 +42,20 @@ const notificationsCollection = db.collection("notifications");
 
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // MUST be app password
       },
       tls: {
         rejectUnauthorized: false,
       },
-      pool: true,
-      rateLimit: 1, // Allow one email at a time (optional)
-      connectionTimeout: 10000, // 10 seconds timeout
-      greetingTimeout: 5000, // 5 seconds timeout for greeting
-      socketTimeout: 5000 // 5 seconds socket timeout
+      connectionTimeout: 30000,
+      socketTimeout: 30000,
     });
+
 
     // Root
     app.get("/", (req, res) => res.send("🚀 Twiller Backend Running!"));
