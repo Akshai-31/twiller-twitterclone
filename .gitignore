@@ -1,0 +1,7 @@
+# root .gitignore
+server/node_modules
+server/.env
+twiller/node_modules
+twiller/.env
+twiller/build
+.DS_Store
