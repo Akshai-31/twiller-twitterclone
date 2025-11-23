@@ -42,18 +42,18 @@ const notificationsCollection = db.collection("notifications");
 
 
     const transporter = nodemailer.createTransport({
+      service: 'gmail', // Use 'service' for better auto-configuration
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      port: 587, // CHANGED: 465 -> 587
+      secure: false, // CHANGED: true -> false (true is only for port 465)
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // MUST be app password
+        pass: process.env.EMAIL_PASS, 
       },
       tls: {
         rejectUnauthorized: false,
       },
-      connectionTimeout: 30000,
-      socketTimeout: 30000,
+      connectionTimeout: 10000, // Reduced to fail faster if there is an issue
     });
 
 
