@@ -42,20 +42,27 @@ const notificationsCollection = db.collection("notifications");
 
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Use 'service' for better auto-configuration
       host: "smtp.gmail.com",
-      port: 587, // CHANGED: 465 -> 587
-      secure: false, // CHANGED: true -> false (true is only for port 465)
+      port: 587, // Recommended port
+      secure: false, // Must be false for 587
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, 
+        pass: process.env.EMAIL_PASS,
       },
       tls: {
         rejectUnauthorized: false,
       },
-      connectionTimeout: 10000, // Reduced to fail faster if there is an issue
     });
 
+    // Add this verification check
+    try {
+      await transporter.verify();
+      console.log("✅ Nodemailer connected to Gmail successfully");
+    } catch (emailError) {
+      console.error("❌ Nodemailer connection failed:", emailError.message);
+      // Do not throw error here to prevent server crash, 
+      // but email features will not work.
+    }
 
     // Root
     app.get("/", (req, res) => res.send("🚀 Twiller Backend Running!"));
