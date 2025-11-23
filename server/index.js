@@ -3,16 +3,21 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
+require("dotenv").config();
+
+// Import the new route file
+const commonRoutes = require("./routes/commonRoutes");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-const uri = "mongodb+srv://akshaiv:vijayrr2205@twitter-db.hsoj1ah.mongodb.net/";
-const port = 5000;
+ 
+const uri = process.env.MONGO_URI
+const port = process.env.PORT;
 
 // Weather API (NO .env)
-const OPENWEATHER_KEY = "e064b116f8820c72fdcb38ecdff6e4b1";
+const OPENWEATHER_KEY = process.env.OPENWEATHER_KEY;
 
 // MongoDB setup
 const client = new MongoClient(uri, {
@@ -31,11 +36,28 @@ async function run() {
     const postcollection = db.collection("posts");
     const usercollection = db.collection("users");
     const followersCollection = db.collection("followers"); // <-- new
+    const otpCollection = db.collection("otp");
+    const loginInfoCollection = db.collection("loginInfos");
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
 
     // Root
     app.get("/", (req, res) => res.send("🚀 Twiller Backend Running!"));
 
-    // Register
+    // ✅ MOUNT COMMON ROUTES (OTP & History)
+    // We pass the dependencies (collections + transporter) here
+    app.use("/", commonRoutes(otpCollection, loginInfoCollection, transporter));
+    
+    // ✅ Register User
     app.post("/register", async (req, res) => {
       try {
         const user = req.body;
@@ -392,4 +414,6 @@ async function run() {
 
 run().catch(console.dir);
 
-app.listen(port, () => console.log(`🚀 Twiller backend running on port ${port}`));
+app.listen(port, () =>
+  console.log(`🚀 Twiller backend running on port ${port}`)
+);
