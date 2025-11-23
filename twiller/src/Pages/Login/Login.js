@@ -98,7 +98,7 @@ const Login = () => {
       }
 
       // Register user in DB
-      await fetch(`${process.env.REACT_APP_API_URL}/register`, {
+      await fetch(`/register`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(newUser),

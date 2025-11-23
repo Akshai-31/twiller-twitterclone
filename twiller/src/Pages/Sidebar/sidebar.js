@@ -45,7 +45,7 @@ const Sidebar = ({ handlelogout, user }) => {
     if (!loggedinuser?.email) return
 
     axios
-      .get(`${process.env.REACT_APP_API_URL}/notifications/count`, {
+      .get(`/notifications/count`, {
         params: { email: loggedinuser.email },
       })
       .then((res) => setNotifCount(res.data.count))
