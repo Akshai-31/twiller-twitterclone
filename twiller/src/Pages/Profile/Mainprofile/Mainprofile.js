@@ -8,6 +8,7 @@ import Editprofile from "../Editprofile/Editprofile";
 import axios from "axios";
 import useLoggedinuser from "../../../hooks/useLoggedinuser";
 import GoogleMap from "../GoogleMap";  // ⭐ ADD THIS IMPORT
+import { uploadMediaToCloudinary } from "../../../utils/cloudinaryUpload";
 
 
 const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
@@ -27,28 +28,7 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
       .then((data) => setpost(data))
   }, [user.email])
 
-  // CLOUDINARY
-  const CLOUDINARY_UPLOAD_PRESET = 'twitter-mern'
-  const CLOUDINARY_CLOUD_NAME = 'devksymwg'
-
-  const uploadToCloudinary = async (file) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-      {
-        method: 'POST',
-        body: formData,
-      }
-    )
-
-    const data = await res.json();
-    return data.secure_url;
-  };
-console.log(location);
-  // Choose Avatar
+  
   const chooseAvatar = async (url) => {
     try {
       await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
@@ -67,10 +47,12 @@ console.log(location);
       setisloading(true)
       const file = e.target.files[0]
 
-      const imageUrl = await uploadToCloudinary(file)
+      const cloudRes = await uploadMediaToCloudinary(file)
 
       await axios.patch(`http://localhost:5000/userupdate/${user?.email}`, {
-        profileImage: imageUrl,
+        profileImage: cloudRes.secure_url,
+        publicId: cloudRes.public_id,
+        mediaType: cloudRes.resource_type,
       })
 
       setisloading(false)
@@ -106,13 +88,18 @@ console.log(location);
                   id="coverUpload"
                   className="imageInput"
                   onChange={async (e) => {
-                    const img = await uploadToCloudinary(e.target.files[0])
-                    await axios.patch(
-                      `http://localhost:5000/userupdate/${user.email}`,
-                      { coverImage: img }
-                    )
-                    window.location.reload()
+                    const file = e.target.files[0];
+                    const cloudRes = await uploadMediaToCloudinary(file);
+
+                    await axios.patch(`http://localhost:5000/userupdate/${user.email}`, {
+                      coverImage: cloudRes.secure_url,
+                      publicId: cloudRes.public_id,
+                      mediaType: cloudRes.resource_type,
+                    });
+
+                    window.location.reload();
                   }}
+
                 />
               </div>
             </div>

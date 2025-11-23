@@ -8,7 +8,7 @@ import useLoggedinuser from "../../../hooks/useLoggedinuser";
 import GoogleMap from "../GoogleMap";
 
 const OtherUserProfile = () => {
-  const { email } = useParams();      // /profile/:email
+  const { email } = useParams();
   const navigate = useNavigate();
   const [loggedinuser] = useLoggedinuser();
 

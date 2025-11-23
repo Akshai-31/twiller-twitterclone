@@ -7,26 +7,25 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import PublishIcon from "@mui/icons-material/Publish";
+import VideoPlayer from "./VideoPlayer";
 
 const Posts = ({ p }) => {
   const navigate = useNavigate();
+  const { name, username, post, profilephoto, email, mediaUrl, mediaType } = p;
 
-  const { name, username, photo, post, profilephoto, email } = p;
-
-  // go to other profile
   const goToProfile = () => {
     navigate(`/home/profile/${email}`);
   };
 
   return (
     <div className="post">
-      <div className="post__avatar" onClick={goToProfile} style={{cursor: "pointer"}}>
+      <div className="post__avatar" onClick={goToProfile} style={{ cursor: "pointer" }}>
         <Avatar src={profilephoto} />
       </div>
 
       <div className="post__body">
         <div className="post__header">
-          <div className="post__headerText" onClick={goToProfile} style={{cursor: "pointer"}}>
+          <div className="post__headerText" onClick={goToProfile} style={{ cursor: "pointer" }}>
             <h3>
               {name}{" "}
               <span className="post__headerSpecial">
@@ -40,13 +39,24 @@ const Posts = ({ p }) => {
           </div>
         </div>
 
-        {photo && <img src={photo} alt="" width="500" />}
+        {mediaUrl && (
+          mediaType === "video" ? (
+            <VideoPlayer src={mediaUrl} />
+          ) : mediaType === "image" ? (
+            <img src={mediaUrl} alt="" className="post_media" />
+          ) : mediaType === "raw" ? (
+            <audio className="post_audio" controls>
+              <source src={mediaUrl} />
+            </audio>
+          ) : null
+        )}
+
 
         <div className="post__footer">
-          <ChatBubbleOutlineIcon className="post__fotter__icon" fontSize="small" />
-          <RepeatIcon className="post__fotter__icon" fontSize="small" />
-          <FavoriteBorderIcon className="post__fotter__icon" fontSize="small" />
-          <PublishIcon className="post__fotter__icon" fontSize="small" />
+          <ChatBubbleOutlineIcon className="post__footer__icon" fontSize="small" />
+          <RepeatIcon className="post__footer__icon" fontSize="small" />
+          <FavoriteBorderIcon className="post__footer__icon" fontSize="small" />
+          <PublishIcon className="post__footer__icon" fontSize="small" />
         </div>
       </div>
     </div>
