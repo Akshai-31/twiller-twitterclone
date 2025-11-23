@@ -31,3 +31,15 @@
       display: none;
     }
   }
+
+  .MuiBadge-badge {
+    transition: all 0.2s ease-in-out;
+  }
+  .iconWrapper {
+    width: 40px;      /* same width for all icons */
+    height: 40px;     /* fixed height so badge doesn't push content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }

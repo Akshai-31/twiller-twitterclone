@@ -22,6 +22,10 @@ import Customlink from "./Customlink";
 import Sidebaroption from "./Sidebaroption";
 import { useNavigate } from "react-router-dom";
 import useLoggedinuser from "../../hooks/useLoggedinuser"
+
+import { useEffect } from "react";
+import axios from "axios";
+
 const Sidebar = ({ handlelogout, user }) => {
   const [anchorE1, setanchorE1] = useState(null);
   const openmenu = Boolean(anchorE1);
@@ -35,6 +39,18 @@ const Sidebar = ({ handlelogout, user }) => {
     setanchorE1(null);
   };
   const result = user?.email?.split("@")[0];
+const [notifCount, setNotifCount] = useState(0);
+
+useEffect(() => {
+  if (!loggedinuser?.email) return;
+
+  axios
+    .get("http://localhost:5000/notifications/count", {
+      params: { email: loggedinuser.email },
+    })
+    .then((res) => setNotifCount(res.data.count))
+    .catch((err) => console.log(err));
+}, [loggedinuser]);
 
   return (
     <div className="sidebar">
@@ -46,7 +62,8 @@ const Sidebar = ({ handlelogout, user }) => {
         <Sidebaroption Icon={SearchIcon} text="Explore" />
       </Customlink>
       <Customlink to="/home/notification">
-        <Sidebaroption Icon={NotificationsNoneIcon} text="Notifications" />
+        <Sidebaroption Icon={NotificationsNoneIcon} text="Notifications" badgeCount={notifCount} />
+
       </Customlink>
       <Customlink to="/home/messages">
         <Sidebaroption Icon={MailOutlineIcon} text="Messages" />

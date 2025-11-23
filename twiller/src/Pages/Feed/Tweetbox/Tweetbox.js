@@ -247,9 +247,18 @@ const Tweetbox = ({ reloadPosts }) => {
       setOtp("");
       setOtpMessage("");
     } catch (err) {
-      console.error(err);
-      alert("Tweet failed");
-      setUploading(false);
+      console.error("Tweet error:", err);
+
+      const backend = err.response?.data;
+      if (backend?.errorType === "time") {
+        alert("Posting allowed only between 10 AM - 10:30 AM (IST) because you have 0 followers.");
+      }
+      else if (backend?.errorType === "limit") {
+        alert("Posting limit reached for today.");
+      }
+      else {
+        alert(backend?.error || "Tweet failed");
+      }
     }
   };
 

@@ -38,3 +38,34 @@
 .follow-btn { background: #1da1f2; color: white; }
 .unfollow-btn { background: #fff; color: #333; border: 1px solid #ccc; }
 .other-bio { margin-top: 12px; color: #333; }
+.followBtn,
+.unfollowBtn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: 0.25s ease-in-out;
+}
+
+/* FOLLOW = Blue */
+.followBtn {
+  background-color: #1da1f2;  /* Twitter Blue */
+  color: white;
+}
+
+.followBtn:hover {
+  background-color: #1488cc;
+}
+
+/* UNFOLLOW = Blue Outline */
+.unfollowBtn {
+  background-color: transparent;
+  color: #1da1f2;
+  border: 2px solid #1da1f2;
+}
+
+.unfollowBtn:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+}

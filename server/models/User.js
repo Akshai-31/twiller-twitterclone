@@ -45,7 +45,11 @@ const userSchema = new mongoose.Schema(
       type: String, // Cover photo URL
       default: "",
     },
-
+// ⭐ ADD THIS
+    isNotification: {
+      type: Boolean,
+      default: true,
+    },
     // Account meta
     createdAt: {
       type: Date,

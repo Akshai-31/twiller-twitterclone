@@ -267,3 +267,12 @@
   margin: 5px 0;
   font-size: 15px;
 }
+.notifIcon {
+  font-size: 28px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.activeNotif {
+  color: #1da1f2; /* Twitter blue */
+}
