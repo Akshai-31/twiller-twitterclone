@@ -229,7 +229,6 @@ const Tweetbox = ({ reloadPosts }) => {
       mediaType: uploadedMedia?.resource_type || '',
       name: loggedinuser?.name,
       username: loggedinuser?.username,
-      profilephoto: loggedinuser?.profilephoto,
       createdAt: new Date(),
     }
 
@@ -344,7 +343,7 @@ const Tweetbox = ({ reloadPosts }) => {
       <div className="tweetBox">
         <form onSubmit={handleSubmit}>
           <div className="tweetBox__input">
-            <Avatar src={loggedinuser?.profilephoto} />
+            <Avatar src={loggedinuser?.profileImage} />
 
             <textarea
               className="tweetBox__textarea"

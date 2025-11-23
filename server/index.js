@@ -333,55 +333,67 @@ app.post("/post", async (req, res) => {
 
 
     // ---------------- GET ALL POSTS ----------------
-    app.get("/post", async (req, res) => {
-      try {
-        const posts = await postcollection.find().toArray();
-        const reversed = posts.reverse();
+    // Get all posts with updated user info
+app.get("/post", async (req, res) => {
+  try {
+    // Fetch all posts
+    const posts = await postcollection.find().toArray();
 
-        const finalPosts = await Promise.all(
-          reversed.map(async p => {
-            const user = await usercollection.findOne({ email: p.email });
-            return {
-              ...p,
-              profileImage: user?.profileImage || null,
-              username: user?.username || "",
-              name: user?.name || ""
-            };
-          })
-        );
+    // Reverse posts so latest comes first
+    const reversedPosts = posts.reverse();
 
-        res.send(finalPosts);
-      } catch (err) {
-        res.status(500).send({ error: "Server error" });
-      }
-    });
-
-    // Get user posts
-    app.get("/userpost", async (req, res) => {
-      try {
-        const email = req.query.email;
-
+    // Add user info from usercollection
+    const finalPosts = await Promise.all(
+      reversedPosts.map(async (post) => {
         const user = await usercollection.findOne(
-          { email },
-          { projection: { profileImage: 1, name: 1, username: 1 } }
+          { email: post.email },
+          { projection: { profileImage: 1, username: 1, name: 1 } }
         );
 
-        let posts = await postcollection.find({ email }).toArray();
-        posts = posts.reverse();
+        return {
+          ...post,
+          profileImage: user?.profileImage || null,
+          username: user?.username || "",
+          name: user?.name || "",
+        };
+      })
+    );
 
-        const finalPosts = posts.map(p => ({
-          ...p,
-          profileImage: user?.profileImage ?? null,
-          username: user?.username ?? email.split("@")[0],
-          name: user?.name ?? ""
-        }));
+    res.send(finalPosts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Server error" });
+  }
+});
 
-        res.send(finalPosts);
+// Get posts for a specific user
+app.get("/userpost", async (req, res) => {
+  try {
+    const email = req.query.email;
 
-      } catch (err) {
-        res.status(500).send({ error: "Server error" });
-      }
-    });
+    // Fetch user info once
+    const user = await usercollection.findOne(
+      { email },
+      { projection: { profileImage: 1, username: 1, name: 1 } }
+    );
+
+    // Fetch user's posts
+    let posts = await postcollection.find({ email }).toArray();
+    posts = posts.reverse(); // latest first
+
+    const finalPosts = posts.map((post) => ({
+      ...post,
+      profileImage: user?.profileImage || null,
+      username: user?.username || email.split("@")[0],
+      name: user?.name || "",
+    }));
+
+    res.send(finalPosts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Server error" });
+  }
+});
 
     // Get location
     app.get("/get-location", async (req, res) => {

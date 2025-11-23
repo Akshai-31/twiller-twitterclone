@@ -11,7 +11,7 @@ import VideoPlayer from "./VideoPlayer";
 
 const Posts = ({ p }) => {
   const navigate = useNavigate();
-  const { name, username, post, profilephoto, email, mediaUrl, mediaType } = p;
+  const { name, username, post, profileImage, email, mediaUrl, mediaType } = p;
 
   const goToProfile = () => {
     navigate(`/home/profile/${email}`);
@@ -20,7 +20,7 @@ const Posts = ({ p }) => {
   return (
     <div className="post">
       <div className="post__avatar" onClick={goToProfile} style={{ cursor: "pointer" }}>
-        <Avatar src={profilephoto} />
+        <Avatar src={profileImage} />
       </div>
 
       <div className="post__body">

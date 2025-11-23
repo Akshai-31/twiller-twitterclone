@@ -32,20 +32,34 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
       .then((data) => setpost(data))
   }, [user.email])
 
-  const chooseAvatar = async (url) => {
-    try {
-      await axios.patch(
-        `${process.env.REACT_APP_API_URL}/userupdate/${user.email}`,
-        {
-          profileImage: url,
-        }
-      )
-      setShowAvatarPopup(false)
-      window.location.reload()
-    } catch (err) {
-      console.log(err)
-    }
+  const chooseAvatar = async (localPath) => {
+  try {
+    // 1. Fetch the local avatar file
+    const response = await fetch(localPath);
+    const blob = await response.blob();
+    const file = new File([blob], 'avatar.jpg', { type: blob.type });
+
+    // 2. Upload to Cloudinary
+    const cloudRes = await uploadMediaToCloudinary(file);
+
+    // 3. Update user profile with the Cloudinary URL
+    await axios.patch(
+      `${process.env.REACT_APP_API_URL}/userupdate/${user.email}`,
+      {
+        profileImage: cloudRes.secure_url,
+        publicId: cloudRes.public_id,
+        mediaType: cloudRes.resource_type,
+      }
+    );
+
+    // 4. Close popup and reload
+    setShowAvatarPopup(false);
+    window.location.reload();
+  } catch (err) {
+    console.error('Error uploading avatar:', err);
   }
+};
+
 
   // Upload Avatar
   const handleuploadprofileimage = async (e) => {
@@ -149,9 +163,10 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
                           src={src}
                           alt="avatar"
                           className="avatarChoice"
-                          onClick={() => chooseAvatar(src)}
+                          onClick={() => chooseAvatar(src)} // JS function call
                         />
                       ))}
+
                     </div>
 
                     <label className="uploadBtn">
