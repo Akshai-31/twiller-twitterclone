@@ -13,6 +13,7 @@
     border-right: 1px solid var(--twitter-background);
     min-width: fit-content;
     overflow-y: scroll;
+    height: 100%;
 }
 
 .profilePage::-webkit-scrollbar {

@@ -12,6 +12,15 @@ body {
   padding: 0 10px;
 }
 
+.center-block {
+  flex: 1;
+  border-left: 1px solid #eff3f4;
+  border-right: 1px solid #eff3f4;
+  min-width: 600px;
+  max-width: 600px;
+  overflow-y: scroll;
+}
+
 @media screen and (max-width:688px) {
   .app {
     display: block;

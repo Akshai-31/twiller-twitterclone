@@ -14,6 +14,10 @@ import Profile from "./Pages/Profile/Profile";
 import More from "./Pages/more/More";
 import { UserAuthContextProvider } from "./context/UserAuthContext";
 import Bookmark from "./Pages/Bookmark/Bookmark";
+import ForgotPassword from "./Pages/forgotpassword/ForgotPassword";
+import OtherUserProfile from "./Pages/Profile/OtherUserProfile/OtherUserProfile";
+import OTPPage from "./Pages/Login/OTPPage";
+
 function App() {
   return (
     <div className="app">
@@ -41,6 +45,8 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/otp" element={<OTPPage />} />
           <Route path="/home" element={<Home />}>
             <Route path="feed" element={<Feed />} />
             <Route path="explore" element={<Explore />} />
@@ -50,6 +56,8 @@ function App() {
             <Route path="bookmarks" element={<Bookmark />} />
             <Route path="profile" element={<Profile />} />
             <Route path="more" element={<More />} />
+        <Route path="profile/:email" element={<OtherUserProfile />} />
+
           </Route>
         </Routes>
       </UserAuthContextProvider>
