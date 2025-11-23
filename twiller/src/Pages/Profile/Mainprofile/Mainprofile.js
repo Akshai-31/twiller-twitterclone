@@ -27,35 +27,39 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
 
   // Fetch User Posts
   useEffect(() => {
-    fetch(`/userpost?email=${user?.email}`)
+    fetch(`${process.env.REACT_APP_API_URL}/userpost?email=${user?.email}`)
       .then((res) => res.json())
       .then((data) => setpost(data))
   }, [user.email])
 
   const chooseAvatar = async (localPath) => {
-    try {
-      // 1. Fetch the local avatar file
-      const response = await fetch(localPath)
-      const blob = await response.blob()
-      const file = new File([blob], 'avatar.jpg', { type: blob.type })
+  try {
+    // 1. Fetch the local avatar file
+    const response = await fetch(localPath);
+    const blob = await response.blob();
+    const file = new File([blob], 'avatar.jpg', { type: blob.type });
 
-      // 2. Upload to Cloudinary
-      const cloudRes = await uploadMediaToCloudinary(file)
+    // 2. Upload to Cloudinary
+    const cloudRes = await uploadMediaToCloudinary(file);
 
-      // 3. Update user profile with the Cloudinary URL
-      await axios.patch(`/userupdate/${user.email}`, {
+    // 3. Update user profile with the Cloudinary URL
+    await axios.patch(
+      `${process.env.REACT_APP_API_URL}/userupdate/${user.email}`,
+      {
         profileImage: cloudRes.secure_url,
         publicId: cloudRes.public_id,
         mediaType: cloudRes.resource_type,
-      })
+      }
+    );
 
-      // 4. Close popup and reload
-      setShowAvatarPopup(false)
-      window.location.reload()
-    } catch (err) {
-      console.error('Error uploading avatar:', err)
-    }
+    // 4. Close popup and reload
+    setShowAvatarPopup(false);
+    window.location.reload();
+  } catch (err) {
+    console.error('Error uploading avatar:', err);
   }
+};
+
 
   // Upload Avatar
   const handleuploadprofileimage = async (e) => {
@@ -65,11 +69,14 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
 
       const cloudRes = await uploadMediaToCloudinary(file)
 
-      await axios.patch(`/userupdate/${user?.email}`, {
-        profileImage: cloudRes.secure_url,
-        publicId: cloudRes.public_id,
-        mediaType: cloudRes.resource_type,
-      })
+      await axios.patch(
+        `${process.env.REACT_APP_API_URL}/userupdate/${user?.email}`,
+        {
+          profileImage: cloudRes.secure_url,
+          publicId: cloudRes.public_id,
+          mediaType: cloudRes.resource_type,
+        }
+      )
 
       setisloading(false)
       window.location.reload()
@@ -82,9 +89,12 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
     const newValue = !notifToggle
     setNotifToggle(newValue)
 
-    await axios.patch(`/user/toggle-notification/${user.email}`, {
-      isNotification: newValue,
-    })
+    await axios.patch(
+      `${process.env.REACT_APP_API_URL}/user/toggle-notification/${user.email}`,
+      {
+        isNotification: newValue,
+      }
+    )
   }
   return (
     <div>
@@ -114,11 +124,14 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
                     const file = e.target.files[0]
                     const cloudRes = await uploadMediaToCloudinary(file)
 
-                    await axios.patch(`/userupdate/${user.email}`, {
-                      coverImage: cloudRes.secure_url,
-                      publicId: cloudRes.public_id,
-                      mediaType: cloudRes.resource_type,
-                    })
+                    await axios.patch(
+                      `${process.env.REACT_APP_API_URL}/userupdate/${user.email}`,
+                      {
+                        coverImage: cloudRes.secure_url,
+                        publicId: cloudRes.public_id,
+                        mediaType: cloudRes.resource_type,
+                      }
+                    )
 
                     window.location.reload()
                   }}
@@ -153,6 +166,7 @@ const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
                           onClick={() => chooseAvatar(src)} // JS function call
                         />
                       ))}
+
                     </div>
 
                     <label className="uploadBtn">

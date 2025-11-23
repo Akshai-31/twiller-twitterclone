@@ -76,7 +76,7 @@ const Editprofile = ({ user }) => {
       setwebsite(parsed.website || '')
       setdob(parsed.dob || '')
     } else if (user?.email) {
-      fetch(`/loggedinuser?email=${user.email}`)
+      fetch(`${process.env.REACT_APP_API_URL}/loggedinuser?email=${user.email}`)
         .then((res) => res.json())
         .then((data) => {
           const userData = data[0] || {}
@@ -98,7 +98,7 @@ const Editprofile = ({ user }) => {
 
     const editinfo = { name, bio, location, website, dob }
 
-    fetch(`/userupdate/${user.email}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/userupdate/${user.email}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(editinfo),

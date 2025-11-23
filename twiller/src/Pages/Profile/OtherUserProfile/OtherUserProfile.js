@@ -23,20 +23,22 @@ const OtherUserProfile = () => {
   // 1. Load profile info
   useEffect(() => {
     axios
-      .get(`/loggedinuser?email=${email}`)
+      .get(`${process.env.REACT_APP_API_URL}/loggedinuser?email=${email}`)
       .then((res) => setProfile(res.data))
       .catch((e) => console.log(e))
   }, [email])
 
   // 2. Load posts
   useEffect(() => {
-    axios.get(`/userpost?email=${email}`).then((res) => setPosts(res.data))
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/userpost?email=${email}`)
+      .then((res) => setPosts(res.data))
   }, [email])
 
   // 3. Load location & weather of that user automatically
   useEffect(() => {
     axios
-      .get(`/get-location?email=${email}`)
+      .get(`${process.env.REACT_APP_API_URL}/get-location?email=${email}`)
       .then((res) => {
         if (res.data.location) {
           const loc = res.data.location
@@ -55,7 +57,7 @@ const OtherUserProfile = () => {
   // 4. Check follow status
   useEffect(() => {
     axios
-      .get(`/follow/status`, {
+      .get(`${process.env.REACT_APP_API_URL}/follow/status`, {
         params: { currentUser: loggedinuser?.email, targetUser: email },
       })
       .then((res) => setIsFollowing(res.data.following))
@@ -64,7 +66,7 @@ const OtherUserProfile = () => {
 
   // 5. Follow
   const followUser = async () => {
-    await axios.post(`/follow`, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/follow`, {
       currentUser: loggedinuser.email,
       targetUser: email,
     })
@@ -73,7 +75,7 @@ const OtherUserProfile = () => {
 
   // 6. Unfollow
   const unfollowUser = async () => {
-    await axios.post(`/unfollow`, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/unfollow`, {
       currentUser: loggedinuser.email,
       targetUser: email,
     })

@@ -16,11 +16,14 @@ const Profile = () => {
     try {
       const coords = await getCurrentLocation()
 
-      const res = await axios.post(`/save-location`, {
-        email: user.email,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      })
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/save-location`,
+        {
+          email: user.email,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }
+      )
 
       const locData = {
         latitude: coords.latitude,

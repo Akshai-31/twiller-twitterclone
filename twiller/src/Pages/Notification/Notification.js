@@ -11,7 +11,7 @@ const Notifications = () => {
 
   const loadData = () => {
     axios
-      .get(`/notifications`, {
+      .get(`${process.env.REACT_APP_API_URL}/notifications`, {
         params: { email: loggedinuser.email },
       })
       .then((res) => setData(res.data))
@@ -23,7 +23,7 @@ const Notifications = () => {
 
   const clearAll = () => {
     axios
-      .delete(`/notifications/clear`, {
+      .delete(`${process.env.REACT_APP_API_URL}/notifications/clear`, {
         data: { email: loggedinuser.email },
       })
       .then(() => setData([]))

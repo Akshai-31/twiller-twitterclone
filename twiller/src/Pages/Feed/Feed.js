@@ -11,13 +11,13 @@ const Feed = () => {
   const { user } = useUserAuth()
 
   const loadHomeFeed = () => {
-    fetch(`/post`)
+    fetch(`${process.env.REACT_APP_API_URL}/post`)
       .then((res) => res.json())
       .then((data) => setPosts(data))
   }
 
   const loadFollowingFeed = () => {
-    fetch(`/feed/following?email=${user.email}`)
+    fetch(`${process.env.REACT_APP_API_URL}/feed/following?email=${user.email}`)
       .then((res) => res.json())
       .then((data) => setPosts(data))
   }

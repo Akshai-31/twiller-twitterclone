@@ -26,7 +26,7 @@ const Signup = () => {
         name: name,
         email: email,
       }
-      fetch(`/register`, {
+      fetch(`${process.env.REACT_APP_API_URL}/register`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -62,7 +62,7 @@ const Signup = () => {
       }
 
       // Check or insert user in MongoDB
-      const res = await fetch(`/register`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
