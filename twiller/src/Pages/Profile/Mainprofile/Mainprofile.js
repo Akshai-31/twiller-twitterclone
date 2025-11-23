@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react'
-import Post from '../Posts/posts'
-import { useNavigate } from 'react-router-dom'
-import './Mainprofile.css'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak'
-import Editprofile from '../Editprofile/Editprofile'
-import axios from 'axios'
-import useLoggedinuser from '../../../hooks/useLoggedinuser'
+import React, { useState, useEffect } from "react";
+import Post from "../Posts/posts";
+import { useNavigate } from "react-router-dom";
+import "./Mainprofile.css";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CenterFocusWeakIcon from "@mui/icons-material/CenterFocusWeak";
+import Editprofile from "../Editprofile/Editprofile";
+import axios from "axios";
+import useLoggedinuser from "../../../hooks/useLoggedinuser";
+import GoogleMap from "../GoogleMap";  // ⭐ ADD THIS IMPORT
 
-const Mainprofile = ({ user, location, handleGetLocation }) => {
-  const navigate = useNavigate()
-  const [isloading, setisloading] = useState(false)
-  const [showAvatarPopup, setShowAvatarPopup] = useState(false)
-  const [loggedinuser] = useLoggedinuser()
-  const username = user?.email?.split('@')[0]
-  const [post, setpost] = useState([])
+
+const Mainprofile = ({ user, location, weather, handleGetLocation }) => {
+  const navigate = useNavigate();
+  const [isloading, setisloading] = useState(false);
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false);
+  const [loggedinuser] = useLoggedinuser();
+  const username = user?.email?.split("@")[0];
+  const [post, setpost] = useState([]);
 
   const avatarList = ['/avatar/a1.jpg', '/avatar/a2.jpg', '/avatar/a3.jpg']
 
@@ -42,10 +44,10 @@ const Mainprofile = ({ user, location, handleGetLocation }) => {
       }
     )
 
-    const data = await res.json()
-    return data.secure_url
-  }
-
+    const data = await res.json();
+    return data.secure_url;
+  };
+console.log(location);
   // Choose Avatar
   const chooseAvatar = async (url) => {
     try {
@@ -172,21 +174,41 @@ const Mainprofile = ({ user, location, handleGetLocation }) => {
                 <Editprofile user={user} loggedinuser={loggedinuser} />
               </div>
 
-              {/* LOCATION SECTION (CLEANED & FIXED) */}
+              {/* LOCATION SECTION */}
               <div className="userInfo">
-                <h3 className="heading-3">{user?.displayName}</h3>
-
                 <div className="locationAndLink">
                   <span className="subInfo">
-                    📍 {location ? location : 'Location not set'}
+                    📍 {location
+                      ? `${location.state}, ${location.country}`
+                      : "Location not set"}
                   </span>
                 </div>
 
-                {/* Location Button */}
                 <button onClick={handleGetLocation} className="getLocationBtn">
                   Get My Location
                 </button>
               </div>
+
+              {/* MAP + WEATHER SECTION ADDED HERE */}
+              {location && (
+                <div className="mapCard">
+                 {/* <h3>Your Live Location</h3> */}
+                  <GoogleMap
+                    latitude={location.latitude}
+                    longitude={location.longitude}
+                  />
+                </div>
+              )}
+
+              {weather && (
+                <div className="weatherCard">
+                  <h3>Weather at your location</h3>
+                  <p>🌡 Temperature: {weather.main.temp}°C</p>
+                  <p>☁ Condition: {weather.weather[0].description}</p>
+                  <p>💧 Humidity: {weather.main.humidity}%</p>
+                  <p>🌬 Wind: {weather.wind.speed} m/s</p>
+                </div>
+              )}
 
               <h4 className="tweetsText">Tweets</h4>
             </div>

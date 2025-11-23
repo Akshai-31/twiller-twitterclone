@@ -2,52 +2,64 @@ import React, { useEffect, useState } from "react";
 import "./Feed.css";
 import Posts from "./Posts/Posts";
 import Tweetbox from "./Tweetbox/Tweetbox";
-const Feed = () => {
-  const [post, setpost] = useState([]);
+import { useUserAuth } from "../../context/UserAuthContext";
 
-  useEffect(() => {
+
+
+const Feed = () => {
+  const [posts, setPosts] = useState([]);
+  const [activeTab, setActiveTab] = useState("home");
+
+ const { user } = useUserAuth();
+
+  const loadHomeFeed = () => {
     fetch("http://localhost:5000/post")
       .then((res) => res.json())
-      .then((data) => {
-        setpost(data);
-      })
-      
-  },[post]);
-  // console.log(post)
-  // const data = [
-  //   {
-  //     _id: "1",
-  //     name: "Jane Doe",
-  //     username: "jane_doe",
-  //     profilePhoto: "https://example.com/profiles/jane.jpg",
-  //     post: "Exploring the new features in JavaScript! 🚀 #coding #JavaScript",
-  //     photo: "https://example.com/posts/javascript.png",
-  //   },
-  //   {
-  //     _id: "2",
-  //     name: "John Smith",
-  //     username: "johnsmith",
-  //     profilePhoto: "https://example.com/profiles/john.jpg",
-  //     post: "Just finished a great workout session! 💪 #fitness #health",
-  //     photo: "https://example.com/posts/workout.png",
-  //   },
-  //   {
-  //     _id: "3",
-  //     name: "Alice Johnson",
-  //     username: "alicejohnson",
-  //     profilePhoto: "https://example.com/profiles/alice.jpg",
-  //     post: "Loving the new features in CSS! #webdevelopment #design",
-  //     photo: "https://example.com/posts/css.png",
-  //   },
-  // ];
-  // setpost(data);
+      .then((data) => setPosts(data));
+  };
+
+  const loadFollowingFeed = () => {
+    fetch(`http://localhost:5000/feed/following?email=${user.email}`)
+      .then((res) => res.json())
+      .then((data) => setPosts(data));
+  };
+
+
+
+  useEffect(() => {
+    if (activeTab === "home") loadHomeFeed();
+    if (activeTab === "following") loadFollowingFeed();
+  }, [activeTab]);
+
+  const reloadPosts = () => {
+    if (activeTab === "home") loadHomeFeed();
+  };
+
   return (
     <div className="feed">
       <div className="feed__header">
         <h2>Home</h2>
       </div>
-      <Tweetbox />
-      {post.map((p) => (
+
+      <div className="feed-tabs">
+        <button
+          className={activeTab === "home" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("home")}
+        >
+          General
+        </button>
+
+        <button
+          className={activeTab === "following" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("following")}
+        >
+          Following
+        </button>
+      </div>
+
+      {activeTab === "home" && <Tweetbox reloadPosts={reloadPosts} />}
+
+      {posts.map((p) => (
         <Posts key={p._id} p={p} />
       ))}
     </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import "./Posts.css";
 import { Avatar } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import RepeatIcon from "@mui/icons-material/Repeat";
@@ -8,15 +9,24 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import PublishIcon from "@mui/icons-material/Publish";
 
 const Posts = ({ p }) => {
-  const { name, username, photo, post, profileImage } = p;
+  const navigate = useNavigate();
+
+  const { name, username, photo, post, profilephoto, email } = p;
+
+  // go to other profile
+  const goToProfile = () => {
+    navigate(`/home/profile/${email}`);
+  };
+
   return (
     <div className="post">
-      <div className="post__avatar">
-        <Avatar src={profileImage} />
+      <div className="post__avatar" onClick={goToProfile} style={{cursor: "pointer"}}>
+        <Avatar src={profilephoto} />
       </div>
+
       <div className="post__body">
         <div className="post__header">
-          <div className="post__headerText">
+          <div className="post__headerText" onClick={goToProfile} style={{cursor: "pointer"}}>
             <h3>
               {name}{" "}
               <span className="post__headerSpecial">
@@ -24,16 +34,16 @@ const Posts = ({ p }) => {
               </span>
             </h3>
           </div>
+
           <div className="post__headerDescription">
             <p>{post}</p>
           </div>
         </div>
-        <img src={photo} alt="" width="500" />
+
+        {photo && <img src={photo} alt="" width="500" />}
+
         <div className="post__footer">
-          <ChatBubbleOutlineIcon
-            className="post__fotter__icon"
-            fontSize="small"
-          />
+          <ChatBubbleOutlineIcon className="post__fotter__icon" fontSize="small" />
           <RepeatIcon className="post__fotter__icon" fontSize="small" />
           <FavoriteBorderIcon className="post__fotter__icon" fontSize="small" />
           <PublishIcon className="post__fotter__icon" fontSize="small" />

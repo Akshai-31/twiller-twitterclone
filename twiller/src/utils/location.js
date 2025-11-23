@@ -1,12 +1,14 @@
 export const getCurrentLocation = () => {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject("Not supported");
+    if (!navigator.geolocation) {
+      reject("Geolocation not supported");
+    }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      (position) => {
         resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
         });
       },
       (err) => reject(err)
