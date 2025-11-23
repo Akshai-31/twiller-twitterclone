@@ -50,6 +50,11 @@ const notificationsCollection = db.collection("notifications");
       tls: {
         rejectUnauthorized: false,
       },
+      pool: true,
+      rateLimit: 1, // Allow one email at a time (optional)
+      connectionTimeout: 10000, // 10 seconds timeout
+      greetingTimeout: 5000, // 5 seconds timeout for greeting
+      socketTimeout: 5000 // 5 seconds socket timeout
     });
 
     // Root
