@@ -537,6 +537,4 @@ app.patch("/user/toggle-notification/:email", async (req, res) => {
 
 run().catch(console.dir);
 
-app.listen(port, () =>
-  console.log(`🚀 Twiller backend running on port ${port}`)
-);
+module.exports = app;

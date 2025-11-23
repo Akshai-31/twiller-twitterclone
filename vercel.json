@@ -1,11 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { "src": "twiller/package.json", "use": "@vercel/static-build", "config": { "distDir": "build" } },
-    { "src": "server/api/**/*.js", "use": "@vercel/node" }
+    { "src": "server/index.js", "use": "@vercel/node" },
+    {
+      "src": "twiller/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "build" }
+    }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "server/api/index.js" },
+    { "src": "/api/(.*)", "dest": "server/index.js" },
     { "src": "/(.*)", "dest": "twiller/build/$1" }
   ]
 }
