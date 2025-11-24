@@ -41,19 +41,45 @@ async function run() {
     const notificationsCollection = db.collection("notifications");
 
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-        tls: {
-            ciphers: 'SSLv3',
-            rejectUnauthorized: false
+    const transporter = {
+      verify: async () => {
+         // Simple check to ensure API Key is present
+         if (!process.env.BREVO_API_KEY) throw new Error("Missing BREVO_API_KEY");
+         console.log("✅ Custom Brevo HTTP Transporter ready");
+         return true;
+      },
+      sendMail: async (mailOptions) => {
+        const data = {
+          sender: { 
+            // Parses "Name <email>" format or uses simple email
+            name: mailOptions.from.includes('<') ? mailOptions.from.split('<')[0].replace(/"/g, '').trim() : "My App",
+            email: mailOptions.from.includes('<') ? mailOptions.from.match(/<([^>]+)>/)[1] : mailOptions.from
+          },
+          to: [{ email: mailOptions.to }],
+          subject: mailOptions.subject,
+          htmlContent: mailOptions.html || mailOptions.text, // Brevo API prefers 'htmlContent'
+        };
+
+        try {
+          const response = await axios.post(
+            'https://api.brevo.com/v3/smtp/email', 
+            data, 
+            {
+              headers: {
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json',
+                'accept': 'application/json'
+              }
+            }
+          );
+          console.log("Email sent via API:", response.data);
+          return response.data;
+        } catch (error) {
+          console.error("API Email Error:", error.response ? error.response.data : error.message);
+          throw error;
         }
-    });
+      }
+    };
 
     // Add this verification check
     try {
