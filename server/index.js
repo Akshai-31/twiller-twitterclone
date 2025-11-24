@@ -38,20 +38,21 @@ async function run() {
     const followersCollection = db.collection("followers"); // <-- new
     const otpCollection = db.collection("otp");
     const loginInfoCollection = db.collection("loginInfos");
-const notificationsCollection = db.collection("notifications");
+    const notificationsCollection = db.collection("notifications");
 
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587, // Recommended port
-      secure: false, // Must be false for 587
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        tls: {
+            ciphers: 'SSLv3',
+            rejectUnauthorized: false
+        }
     });
 
     // Add this verification check
